@@ -1,0 +1,964 @@
+{
+  "personal_info": {
+    "full_name": "Yassine Dhouib",
+    "first_name": "Yassine",
+    "last_name": "Dhouib",
+    "headline": "Full Stack Developer, Creative Technologist, and Digital Product Builder",
+    "summary": "Full stack developer, engineer, artist, and inventor based in Tunisia with experience building digital products, automation systems, educational platforms, booking systems, branding assets, and experimental hardware projects.",
+    "contact": {
+      "email": "yassine.m.dhouib@gmail.com",
+      "phone": "+21654489995",
+      "linkedin": "https://www.linkedin.com/in/yassine-dhouib-798092266/",
+      "github": "github.com/Mastersonic544",
+      "portfolio": "yassinedhouib.netlify.app"
+    },
+    "location": {
+      "city": "Sfax, Sakiet Ezzit",
+      "country": "Tunisia",
+      "remote_open": true,
+      "relocation_open": true
+    },
+    "languages": [
+      {
+        "language": "Arabic",
+        "proficiency": "native"
+      },
+      {
+        "language": "French",
+        "proficiency": "advanced"
+      },
+      {
+        "language": "English",
+        "proficiency": "fluent"
+      }
+    ]
+  },
+  "work_experience": [
+    {
+      "company": "CHIFT",
+      "title": "Founder & Mobile Developer",
+      "start_date": "2025-04",
+      "end_date": null,
+      "is_current": true,
+      "location": "Sfax, Tunisia",
+      "responsibilities": [
+        "Architecting and building a B2B mobile platform that centralizes multi-business management from a single interface",
+        "Leading product strategy, design, and end-to-end development lifecycle",
+        "Managing backend infrastructure with Firebase and building cross-platform UI with Flutter",
+        "Conducting market research and iterating on product based on early user feedback"
+      ],
+      "achievements": [
+        "Launched MVP of a multi-business management platform as a solo founder",
+        "Delivered a cross-platform mobile experience using Flutter targeting B2B clients in Tunisia"
+      ],
+      "tech_stack": [
+        "Flutter",
+        "Firebase",
+        "React"
+      ]
+    },
+    {
+      "company": "Devura",
+      "title": "Full Stack Developer & Graphic Designer",
+      "start_date": "2024-01",
+      "end_date": null,
+      "is_current": true,
+      "location": "Sfax, Tunisia",
+      "responsibilities": [
+        "Developing and maintaining frontend systems and web applications",
+        "Designing UI components, marketing materials, and brand assets",
+        "Collaborating with product teams to translate requirements into polished interfaces",
+        "Producing motion graphics and video content for digital campaigns"
+      ],
+      "achievements": [
+        "Contributed to multiple client-facing products across both design and development tracks",
+        "Established consistent design language across frontend systems"
+      ],
+      "tech_stack": [
+        "Figma",
+        "Photoshop",
+        "Illustrator",
+        "Canva",
+        "Capcut",
+        "After Effects",
+        "Premiere Pro",
+        "React"
+      ]
+    },
+    {
+      "company": "MallouliNova",
+      "title": "Frontend Developer",
+      "start_date": "2024-10",
+      "end_date": "2024-12",
+      "is_current": false,
+      "location": "Sfax, Tunisia",
+      "responsibilities": [
+        "Built a fully functional React website for an IoT company from scratch",
+        "Integrated custom Lottie file animations and interactive 3D elements for an immersive experience",
+        "Implemented a complete blog system with an admin dashboard and a custom mini CMS without relying on third-party CMS platforms",
+        "Applied full SEO optimization including meta tags, structured data, and performance tuning"
+      ],
+      "achievements": [
+        "Shipped a production-ready React website within 2 months",
+        "Delivered a custom CMS solution that gave the client full content control without external dependencies",
+        "Achieved strong SEO scores through technical and on-page optimization"
+      ],
+      "tech_stack": [
+        "React",
+        "Lottie",
+        "Three.js",
+        "Node.js",
+        "Firebase"
+      ]
+    },
+    {
+      "company": "MallouliAuto",
+      "title": "Graphic Designer",
+      "start_date": "2025-01",
+      "end_date": "2025-02",
+      "is_current": false,
+      "location": "Sfax, Tunisia",
+      "responsibilities": [
+        "Handled all graphic design needs including flyers, business cards, and banners",
+        "Created print-ready and digital assets aligned with the brand's visual identity",
+        "Coordinated with the client to ensure design output matched their communication goals"
+      ],
+      "achievements": [
+        "Delivered a full suite of marketing collateral covering all of MallouliAuto's design needs within one month"
+      ],
+      "tech_stack": [
+        "Figma",
+        "Photoshop",
+        "Illustrator"
+      ]
+    },
+    {
+      "company": "MallouliAuto",
+      "title": "Brand Designer & UI/UX Designer",
+      "start_date": "2025-02",
+      "end_date": "2025-04",
+      "is_current": false,
+      "location": "Sfax, Tunisia",
+      "responsibilities": [
+        "Designed the company logo and established the full graphic identity and brand guidelines",
+        "Created a cohesive visual language including typography, color palette, and iconography",
+        "Led UI/UX design for the company's mobile app, covering user flows, wireframes, and high-fidelity prototypes"
+      ],
+      "achievements": [
+        "Shipped brand identity and logo within 2 weeks of project kickoff",
+        "Produced a complete UI/UX design system for the mobile app ready for handoff to development"
+      ],
+      "tech_stack": [
+        "Figma",
+        "Illustrator",
+        "Photoshop"
+      ]
+    },
+    {
+      "company": "innotwist",
+      "title": "Graphic Designer",
+      "start_date": "2025-08",
+      "end_date": "2026-04",
+      "is_current": false,
+      "location": "Sfax, Tunisia",
+      "responsibilities": [
+        "Produced visual content and design assets across various digital and print formats",
+        "Supported the creative team with branding, social media graphics, and marketing materials",
+        "Maintained visual consistency across all client-facing outputs"
+      ],
+      "achievements": [
+        "Delivered consistent design output across multiple ongoing client projects",
+        "Contributed to brand refresh initiatives that improved visual coherence"
+      ],
+      "tech_stack": [
+        "Figma",
+        "Photoshop",
+        "Illustrator",
+        "After Effects"
+      ]
+    },
+    {
+      "company": "Future Proof",
+      "title": "Video Editor & Content Creator",
+      "start_date": "2025-03",
+      "end_date": "2025-09",
+      "is_current": false,
+      "location": "Sfax, Tunisia",
+      "responsibilities": [
+        "Handled end-to-end video production including videography, scripting, and post-production editing",
+        "Wrote compelling scripts tailored to target audiences for social media and marketing campaigns",
+        "Edited footage with motion graphics, sound design, and color grading for polished final deliverables"
+      ],
+      "achievements": [
+        "Produced a consistent pipeline of video content supporting the company's content marketing strategy",
+        "Improved production turnaround time by streamlining the scripting-to-edit workflow"
+      ],
+      "tech_stack": [
+        "Premiere Pro",
+        "After Effects",
+        "Capcut"
+      ]
+    },
+    {
+      "company": "Iyed Colab",
+      "title": "Social Media Manager",
+      "start_date": "2024-10",
+      "end_date": "2025-03",
+      "is_current": false,
+      "location": "Sfax, Tunisia",
+      "responsibilities": [
+        "Managed social media presence across multiple platforms including content planning and scheduling",
+        "Created and curated content aligned with brand voice and audience engagement goals",
+        "Tracked performance metrics and adjusted strategy based on analytics insights"
+      ],
+      "achievements": [
+        "Grew audience engagement through consistent content strategy over a 5-month period",
+        "Built and maintained a content calendar that ensured regular, on-brand posting"
+      ],
+      "tech_stack": [
+        "Canva",
+        "Meta Business Suite",
+        "Capcut"
+      ]
+    }
+  ],
+  "education": [
+    {
+      "institution": "International School of Business",
+      "degree": "Bachelor of Business Intelligence",
+      "field": "Business Intelligence",
+      "start_date": "2024",
+      "end_date": "2027",
+      "grade": ""
+    },
+    {
+      "institution": "Medipol University Istanbul",
+      "degree": "Bachelor of Engineering",
+      "field": "Electrical and Electronics Engineering",
+      "start_date": "2022",
+      "end_date": "2022",
+      "grade": ""
+    }
+  ],
+  "skills": {
+    "technical": [
+      "JavaScript",
+      "Power BI",
+      "Express JS",
+      "Node JS",
+      "React JS",
+      "Tailwind CSS",
+      "Flutter",
+      "Adobe After Effects",
+      "Adobe Illustrator",
+      "Adobe Photoshop",
+      "Canva",
+      "Capcut",
+      "Adobe Premier Pro",
+      "Blender",
+      "HTML",
+      "CSS",
+      "Springboot",
+      "Angular",
+      "Stripe",
+      "Supabase",
+      "Firebase",
+      "Netlify",
+      "Vercel",
+      "Render",
+      "Oxahost",
+      "WordPress",
+      "LocalWP",
+      "PHP",
+      "jQuery",
+      "SQL",
+      "Tableau",
+      "Git",
+      "GitHub",
+      "GitHub Actions",
+      "Miro",
+      "Trello",
+      "Tinkercad",
+      "C",
+      "C++",
+      "C#",
+      "Python",
+      "OpenRouter",
+      "Groq",
+      "N8n",
+      "Zapier",
+      "Full Stack Development",
+      "UI/UX Design",
+      "Automation",
+      "Python Development",
+      "Tkinter",
+      "Web Development",
+      "Frontend Development",
+      "Backend Development",
+      "Arduino",
+      "ESP32",
+      "3D Printing",
+      "Rapid Prototyping",
+      "Discord Automation",
+      "Business System Design",
+      "Content Creation",
+      "Branding",
+      "Creative Direction",
+      "App Development",
+      "TypeScript",
+      "FinTech",
+      "Islamic Finance"
+    ],
+    "soft": [
+      "Leadership",
+      "Stress Management",
+      "Decision Making",
+      "Team Player",
+      "Problem Solving",
+      "Management",
+      "Thinking Outside of the Box",
+      "Creativity",
+      "Art",
+      "Drawing",
+      "Multitasking",
+      "Delivery",
+      "Shipping",
+      "Creative Thinking",
+      "Entrepreneurship",
+      "Adaptability",
+      "Systems Thinking",
+      "Self-Learning",
+      "Communication",
+      "Innovation"
+    ],
+    "tools": [
+      "Adobe Creative Suite",
+      "Figma",
+      "Sketch",
+      "InVision",
+      "Pydroid",
+      "MIT App Inventor",
+      "AutoHotkey",
+      "Arduino",
+      "ESP32-CAM"
+    ],
+    "frameworks": [
+      "Tkinter"
+    ]
+  },
+  "projects": [
+    {
+      "id": null,
+      "name": "Personal Website",
+      "description": "A responsive website showcasing my skills and experience",
+      "type": null,
+      "technologies": null,
+      "tech_stack": [
+        "HTML",
+        "CSS",
+        "JavaScript",
+        "React JS"
+      ],
+      "role": null,
+      "status": null,
+      "outcome": null,
+      "url": null
+    },
+    {
+      "id": null,
+      "name": "Automation System",
+      "description": "An automation system for streamlining business processes",
+      "type": null,
+      "technologies": null,
+      "tech_stack": [
+        "Python",
+        "Node JS",
+        "Express JS"
+      ],
+      "role": null,
+      "status": null,
+      "outcome": null,
+      "url": null
+    },
+    {
+      "name": "Cleaning Products Business Management Software",
+      "description": "Python/Tkinter software for companies manufacturing cleaning products. Includes management tools and a lab section capable of scraping chemical data, prices, and supplier information.",
+      "technologies": [
+        "Python",
+        "Tkinter",
+        "Web Scraping"
+      ],
+      "outcome": "Designed as a commercial one-time purchase product with modular paid feature expansion.",
+      "url": ""
+    },
+    {
+      "name": "Artist-Focused Mobile Application",
+      "description": "Application designed for artists with integrated monetization using non-intrusive ads and creative-focused features.",
+      "technologies": [
+        "Mobile App Development",
+        "UI/UX Design"
+      ],
+      "outcome": "Created as a scalable platform targeting creative users.",
+      "url": ""
+    },
+    {
+      "name": "Randev Booking System",
+      "description": "Booking system for businesses such as hair salons and car washes with branded marketing materials and animated promotional content.",
+      "technologies": [
+        "Web Development",
+        "Animation",
+        "UI/UX Design"
+      ],
+      "outcome": "Produced promotional campaign assets including Eid-themed animated advertising.",
+      "url": ""
+    },
+    {
+      "name": "Container Housing Business Concept",
+      "description": "Business model focused on recycling shipping containers into affordable housing while reducing CO2 emissions, water consumption, construction resources, and build times.",
+      "technologies": [
+        "Business Planning",
+        "Sustainability Research"
+      ],
+      "outcome": "Developed detailed business plan concepts and sustainability positioning.",
+      "url": ""
+    },
+    {
+      "name": "Low-Cost 3D Printer Conversion",
+      "description": "Engineering project converting a 3D pen into a low-cost smartphone-controlled 3D printer using Arduino-compatible hardware and an ESP32-CAM.",
+      "technologies": [
+        "Arduino",
+        "ESP32-CAM",
+        "Mechanical Design",
+        "3D Printing"
+      ],
+      "outcome": "Created a modular non-destructive design allowing both manual and automated use.",
+      "url": ""
+    },
+    {
+      "name": "Discord Moderation Automation",
+      "description": "AutoHotkey automation script for Discord moderation workflows.",
+      "technologies": [
+        "AutoHotkey"
+      ],
+      "outcome": "Automated repetitive moderation responses and shortcuts.",
+      "url": ""
+    },
+    {
+      "name": "English 101 Learning Platform",
+      "description": "Educational platform for English learning with quizzes and interactive learning content.",
+      "technologies": [
+        "Web Development",
+        "Educational Technology"
+      ],
+      "outcome": "Built as a digital learning experience for students.",
+      "url": ""
+    },
+    {
+      "name": "Coffee Shop Mobile App",
+      "description": "Custom-themed coffee shop application inspired by the branding and mascots of the business, including a built-in mini-game.",
+      "technologies": [
+        "UI/UX Design",
+        "App Development"
+      ],
+      "outcome": "Created a branded customer engagement experience.",
+      "url": ""
+    },
+    {
+      "name": "Robotics and Programming Education Content",
+      "description": "Digital content and branding work for local robotics and programming education centers in Tunisia.",
+      "technologies": [
+        "Content Creation",
+        "Branding",
+        "Social Media Design"
+      ],
+      "outcome": "Produced marketing and educational promotional materials.",
+      "url": ""
+    },
+    {
+      "id": null,
+      "name": "CV Maker",
+      "description": "Local AI-powered job application automation platform. Discovers LinkedIn job listings, generates hyper-tailored CVs and cover letters via a GAN-style LLM loop, auto-applies via Playwright or SMTP, and provides a persona-driven interview simulator.",
+      "type": null,
+      "technologies": [
+        "Python",
+        "FastAPI",
+        "React",
+        "Playwright",
+        "OpenRouter API",
+        "Pydantic",
+        "Tailwind CSS"
+      ],
+      "tech_stack": [
+        "Python",
+        "FastAPI",
+        "React",
+        "JavaScript",
+        "Tailwind CSS",
+        "Playwright"
+      ],
+      "role": null,
+      "status": null,
+      "outcome": null,
+      "url": "https://github.com/Mastersonic544/CV-maker"
+    },
+    {
+      "id": null,
+      "name": "EduLink",
+      "description": "Professional network platform built around how teachers teach, enabling educators to connect and collaborate based on their pedagogical approaches.",
+      "type": null,
+      "technologies": [
+        "TypeScript"
+      ],
+      "tech_stack": [
+        "TypeScript"
+      ],
+      "role": null,
+      "status": null,
+      "outcome": null,
+      "url": "https://github.com/Mastersonic544/EduLink"
+    },
+    {
+      "id": null,
+      "name": "Princess – Love Quote Reels",
+      "description": "TikTok-style infinite-scroll web app that generates and displays personalized love quote reels.",
+      "type": null,
+      "technologies": [
+        "TypeScript"
+      ],
+      "tech_stack": [
+        "TypeScript"
+      ],
+      "role": null,
+      "status": null,
+      "outcome": null,
+      "url": "https://github.com/Mastersonic544/princess"
+    },
+    {
+      "id": null,
+      "name": "Resty – Eye Rest App",
+      "description": "Flutter mobile application that guides users through the 20-20-20 eye rest method to reduce screen-induced eye strain.",
+      "type": null,
+      "technologies": [
+        "Flutter",
+        "Dart"
+      ],
+      "tech_stack": [
+        "Flutter",
+        "Dart"
+      ],
+      "role": null,
+      "status": null,
+      "outcome": null,
+      "url": "https://github.com/Mastersonic544/Resty_app"
+    },
+    {
+      "id": null,
+      "name": "Media Resolution Viewer",
+      "description": "Web app for displaying media content with a selectable quality resolution picker ranging from 144p to 1080p.",
+      "type": null,
+      "technologies": [
+        "HTML",
+        "CSS",
+        "JavaScript"
+      ],
+      "tech_stack": [
+        "HTML",
+        "CSS",
+        "JavaScript"
+      ],
+      "role": null,
+      "status": null,
+      "outcome": null,
+      "url": "https://github.com/Mastersonic544/another-other-cute-one"
+    },
+    {
+      "id": null,
+      "name": "Malloulinova – B2B IoT Consulting Platform",
+      "description": "Full-stack B2B IoT consulting platform featuring article management, multi-tag project filtering, a Groq-powered AI chatbot for lead qualification, real-time visitor analytics with click heatmaps, and an admin dashboard.",
+      "type": null,
+      "technologies": [
+        "React",
+        "Vite",
+        "Firebase",
+        "Supabase",
+        "Express JS",
+        "Groq API",
+        "PostgreSQL"
+      ],
+      "tech_stack": [
+        "React",
+        "TypeScript",
+        "Firebase",
+        "Supabase",
+        "Express JS",
+        "PostgreSQL"
+      ],
+      "role": null,
+      "status": null,
+      "outcome": null,
+      "url": "https://github.com/Mastersonic544/malloulinova-test"
+    },
+    {
+      "id": null,
+      "name": "Public Police – Civic Infraction Reporting App",
+      "description": "Web application enabling citizens to report minor infractions with supporting evidence, and administrators to view, filter, approve, or reject submitted reports via a dashboard. Includes light/dark theme and localStorage persistence.",
+      "type": null,
+      "technologies": [
+        "HTML",
+        "CSS",
+        "JavaScript"
+      ],
+      "tech_stack": [
+        "HTML",
+        "CSS",
+        "JavaScript"
+      ],
+      "role": null,
+      "status": null,
+      "outcome": null,
+      "url": "https://github.com/Mastersonic544/project-web"
+    },
+    {
+      "id": null,
+      "name": "Don't Shift – Focus Timer & Task Manager",
+      "description": "Desktop focus timer and task management application designed to help users maintain deep work and reduce context switching.",
+      "type": null,
+      "technologies": [
+        "TypeScript"
+      ],
+      "tech_stack": [
+        "TypeScript"
+      ],
+      "role": null,
+      "status": null,
+      "outcome": null,
+      "url": "https://github.com/Mastersonic544/dont-shift"
+    },
+    {
+      "id": null,
+      "name": "Hackathon Project",
+      "description": "Full-stack hackathon submission with a Java/TypeScript backend and HTML/CSS frontend, built competitively as part of a programming event.",
+      "type": null,
+      "technologies": [
+        "Java",
+        "TypeScript",
+        "HTML",
+        "CSS"
+      ],
+      "tech_stack": [
+        "Java",
+        "TypeScript",
+        "HTML",
+        "CSS"
+      ],
+      "role": null,
+      "status": null,
+      "outcome": null,
+      "url": "https://github.com/Mastersonic544/project-hackathon"
+    },
+    {
+      "id": null,
+      "name": "LibRent – Library Rental System",
+      "description": "Web-based library book rental management system.",
+      "type": null,
+      "technologies": [
+        "JavaScript"
+      ],
+      "tech_stack": [
+        "JavaScript"
+      ],
+      "role": null,
+      "status": null,
+      "outcome": null,
+      "url": "https://github.com/Mastersonic544/librent"
+    },
+    {
+      "id": null,
+      "name": "Iyed Colab Rental System",
+      "description": "PHP-based rental management web application built for the Iyed Colab workspace.",
+      "type": null,
+      "technologies": [
+        "PHP"
+      ],
+      "tech_stack": [
+        "PHP"
+      ],
+      "role": null,
+      "status": null,
+      "outcome": null,
+      "url": "https://github.com/Mastersonic544/iyed-colab-rent"
+    },
+    {
+      "id": null,
+      "name": "Shiftewi – Student Tools & Games",
+      "description": "Website offering a collection of useful tools and browser games targeted towards students.",
+      "type": null,
+      "technologies": [
+        "HTML",
+        "CSS",
+        "JavaScript"
+      ],
+      "tech_stack": [
+        "HTML",
+        "CSS",
+        "JavaScript"
+      ],
+      "role": null,
+      "status": null,
+      "outcome": null,
+      "url": "https://github.com/Mastersonic544/shiftewi"
+    },
+    {
+      "id": null,
+      "name": "Chessewi – Browser Chess Game",
+      "description": "Proof-of-concept browser chess game with a 5×6 grid, Unicode piece rendering, and click-to-move interaction.",
+      "type": null,
+      "technologies": [
+        "HTML",
+        "CSS",
+        "JavaScript"
+      ],
+      "tech_stack": [
+        "HTML",
+        "CSS",
+        "JavaScript"
+      ],
+      "role": null,
+      "status": null,
+      "outcome": null,
+      "url": "https://github.com/Mastersonic544/chessewi"
+    },
+    {
+      "id": null,
+      "name": "Rush It – Pomodoro Web App",
+      "description": "Web-based Pomodoro timer for time management and focused work sessions.",
+      "type": null,
+      "technologies": [
+        "HTML",
+        "CSS",
+        "JavaScript"
+      ],
+      "tech_stack": [
+        "HTML",
+        "CSS",
+        "JavaScript"
+      ],
+      "role": null,
+      "status": null,
+      "outcome": null,
+      "url": "https://github.com/Mastersonic544/rush-it-web"
+    },
+    {
+      "id": null,
+      "name": "Sabboura – Web Whiteboard",
+      "description": "Browser-based digital whiteboard application for freehand drawing and note-taking.",
+      "type": null,
+      "technologies": [
+        "HTML",
+        "CSS",
+        "JavaScript"
+      ],
+      "tech_stack": [
+        "HTML",
+        "CSS",
+        "JavaScript"
+      ],
+      "role": null,
+      "status": null,
+      "outcome": null,
+      "url": "https://github.com/Mastersonic544/sabboura"
+    },
+    {
+      "id": null,
+      "name": "Chkobba Score Counter",
+      "description": "Simple web-based score tracker for the traditional Tunisian card game Chkobba.",
+      "type": null,
+      "technologies": [
+        "HTML",
+        "CSS",
+        "JavaScript"
+      ],
+      "tech_stack": [
+        "HTML",
+        "CSS",
+        "JavaScript"
+      ],
+      "role": null,
+      "status": null,
+      "outcome": null,
+      "url": "https://github.com/Mastersonic544/Chkobba-Score-Counter"
+    },
+    {
+      "id": null,
+      "name": "Iyed Coffee Menu",
+      "description": "Digital coffee menu web application for the Iyed Colab space.",
+      "type": null,
+      "technologies": [
+        "HTML",
+        "CSS",
+        "JavaScript"
+      ],
+      "tech_stack": [
+        "HTML",
+        "CSS",
+        "JavaScript"
+      ],
+      "role": null,
+      "status": null,
+      "outcome": null,
+      "url": "https://github.com/Mastersonic544/Iyed_Coffee"
+    },
+    {
+      "id": null,
+      "name": "PokDex – Pokédex Web App",
+      "description": "Simple browser-based Pokédex for browsing and looking up Pokémon data.",
+      "type": null,
+      "technologies": [
+        "HTML",
+        "CSS",
+        "JavaScript"
+      ],
+      "tech_stack": [
+        "HTML",
+        "CSS",
+        "JavaScript"
+      ],
+      "role": null,
+      "status": null,
+      "outcome": null,
+      "url": "https://github.com/Mastersonic544/pok-dex"
+    }
+  ],
+  "certifications": [
+    {
+      "id": null,
+      "name": "Certified Scrum Master",
+      "issuer": null,
+      "issued_date": null,
+      "type": null
+    },
+    {
+      "name": "Project Management Professional (PMP)",
+      "issuer": "",
+      "issued_date": ""
+    },
+    {
+      "name": "Certificate of Participation Public Speaking",
+      "issuer": "",
+      "issued_date": ""
+    },
+    {
+      "name": "Sos mentor and judge certificate",
+      "issuer": "",
+      "issued_date": ""
+    },
+    {
+      "name": "Responsive Web Design",
+      "issuer": "",
+      "issued_date": ""
+    },
+    {
+      "name": "Certificate of appreciation",
+      "issuer": "",
+      "issued_date": ""
+    }
+  ],
+  "personality_and_work_style": {
+    "work_style": "Independent, highly creative, experimental, and product-focused builder who prefers hands-on iteration and practical execution.",
+    "strengths": [
+      "Creative engineering",
+      "Rapid learning",
+      "Cross-disciplinary thinking",
+      "Strong product ideation",
+      "UI/UX intuition",
+      "Technical adaptability",
+      "Innovation under constraints",
+      "Business-oriented problem solving",
+      "Branding and naming creativity",
+      "Creative problem solving",
+      "Rapid prototyping",
+      "Product design",
+      "Entrepreneurial mindset"
+    ],
+    "values": [
+      "Innovation",
+      "Independence",
+      "Efficiency",
+      "Creativity",
+      "Practicality",
+      "Authenticity",
+      "Self-improvement",
+      "Long-term product ownership",
+      "Creative freedom",
+      "Scalability"
+    ],
+    "personality_traits": [
+      "Curious",
+      "Adaptable",
+      "Resilient",
+      "Open-minded",
+      "Proactive"
+    ],
+    "traits": [
+      "Curious",
+      "Adaptable",
+      "Resilient",
+      "Open-minded",
+      "Proactive"
+    ],
+    "approach": "Independent, highly creative, experimental, and product-focused builder who prefers hands-on iteration and practical execution.",
+    "team_preference": "Collaborative team player who values open communication and feedback"
+  },
+  "preferences_and_goals": {
+    "target_roles": [
+      "Full Stack Vibe Coder",
+      "Full Stack Developer",
+      "Product Designer",
+      "Creative Technologist",
+      "Automation Engineer",
+      "Startup Founder"
+    ],
+    "target_industries": [
+      "Tech",
+      "Software Development",
+      "Creative Technology",
+      "Automation",
+      "EdTech",
+      "SaaS",
+      "Digital Products"
+    ],
+    "preferred_locations": [
+      "Remote",
+      "Tunisia"
+    ],
+    "work_type": "remote",
+    "open_to_relocation": true,
+    "long_term_goals": [
+      "Start my own tech company",
+      "Create innovative products that make a positive impact"
+    ],
+    "remote_preference": "Remote",
+    "career_goal": "To start my own tech company and create innovative products that make a positive impact"
+  },
+  "_ai_pending": [
+    "education"
+  ],
+  "cv_generation_hints": {
+    "tone": "Professional and creative",
+    "emphasis": [
+      "Technical skills",
+      "Creative problem-solving",
+      "Collaboration and teamwork"
+    ],
+    "avoid": [
+      "Jargon and technical terms that may be unfamiliar to non-technical readers"
+    ],
+    "keywords": [
+      "Full stack development",
+      "Creative technology",
+      "Digital product building",
+      "Automation systems",
+      "Branding and naming"
+    ]
+  }
+}
