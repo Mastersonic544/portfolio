@@ -6,7 +6,7 @@
   import { db } from '$lib/firebase.js';
   import { logClick } from '$lib/utils/analytics.js';
 
-  /** @type {{ slug: string; date: string; caption: string }[]} */
+  /** @type {{ slug: string; date: string; caption: string; url?: string }[]} */
   let highlights = $state([]);
   let loaded     = $state(false);
 
