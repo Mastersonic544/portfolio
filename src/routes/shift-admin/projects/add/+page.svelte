@@ -702,18 +702,7 @@ My project: [DESCRIBE YOUR PROJECT HERE]`;
 
   .image-preview img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
-  /* removed */
-    font-family: var(--font-body);
-    font-size: 0.75rem;
-    color: var(--text-muted);
-    line-height: 1.6;
-  }
 
-  /* removed */ {
-    font-size: 0.78rem;
-    color: var(--accent);
-    font-family: 'Courier New', monospace;
-  }
 
   /* Upload status messages */
   .upload-status {
@@ -722,7 +711,7 @@ My project: [DESCRIBE YOUR PROJECT HERE]`;
     color: var(--text-muted);
     margin-top: 0.4rem;
   }
-  /* removed */  { color: var(--accent); font-family: 'Courier New', monospace; }
+
   .upload-status.done  { color: #38a169; }
   .upload-status.error { color: #e53e3e; }
 
