@@ -11,7 +11,7 @@
   let loaded     = $state(false);
 
   /** @type {HTMLElement} */
-  let sectionEl;
+  let sectionEl = $state();
 
   onMount(async () => {
     logClick('highlights');

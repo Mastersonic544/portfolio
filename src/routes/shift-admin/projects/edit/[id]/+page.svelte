@@ -235,6 +235,7 @@
       <!-- AI Generator Tool -->
       <div class="field full ai-generator-box">
         <div class="ai-generator-header">
+          <!-- svelte-ignore a11y_label_has_associated_control -->
           <label>Google X-Y-Z Article Generator</label>
           <span class="ai-badge">AI writer</span>
         </div>
@@ -283,6 +284,7 @@
 
       <!-- KPIs -->
       <div class="field full">
+        <!-- svelte-ignore a11y_label_has_associated_control -->
         <label>KPIs</label>
         <div class="kpi-list">
           {#each kpis as kpi, i}
@@ -330,6 +332,7 @@
 
       <!-- Image upload -->
       <div class="field full">
+        <!-- svelte-ignore a11y_label_has_associated_control -->
         <label>Thumbnail <span class="field-hint">any image — auto-converts &amp; saved to disk as WebP</span></label>
 
         <!-- Show current thumbnail if one exists -->
