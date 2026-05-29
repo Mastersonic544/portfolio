@@ -1,5 +1,5 @@
 import { json } from '@sveltejs/kit';
-import { OPENROUTER_API_KEY } from '$env/dynamic/private';
+import { env } from '$env/dynamic/private';
 
 // Cleans up markdown returned by the LLM for prettier display
 function cleanMarkdown(md) {
@@ -58,7 +58,8 @@ export async function POST({ request }) {
       });
     }
 
-    if (!OPENROUTER_API_KEY || OPENROUTER_API_KEY.includes('placeholder')) {
+    const apiKey = env.OPENROUTER_API_KEY;
+    if (!apiKey || apiKey.includes('placeholder')) {
       return new Response(JSON.stringify({ error: 'OpenRouter API Key is missing or invalid in environment variables.' }), {
         status: 500,
         headers: { 'Content-Type': 'application/json' }
@@ -94,7 +95,7 @@ Generate the JSON now:`;
     const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+        'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
         'HTTP-Referer': 'https://shift-portfolio.vercel.app',
         'X-Title': 'Shift Portfolio'

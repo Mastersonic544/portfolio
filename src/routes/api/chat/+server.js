@@ -1,5 +1,5 @@
 import { json, error } from '@sveltejs/kit';
-import { OPENROUTER_API_KEY } from '$env/dynamic/private';
+import { env } from '$env/dynamic/private';
 
 // TODO: Replace this placeholder with your actual profile JSON
 const PROFILE_CONTEXT = `PROFILE_JSON_PLACEHOLDER`;
@@ -16,10 +16,15 @@ export async function POST({ request }) {
     throw error(400, 'Message is required');
   }
 
+  const apiKey = env.OPENROUTER_API_KEY;
+  if (!apiKey) {
+    throw error(500, 'AI configuration missing');
+  }
+
   const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+      'Authorization': `Bearer ${apiKey}`,
       'Content-Type': 'application/json',
       'HTTP-Referer': 'https://shift-portfolio.vercel.app',
       'X-Title': 'Shift Portfolio'
