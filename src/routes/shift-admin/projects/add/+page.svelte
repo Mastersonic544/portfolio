@@ -273,14 +273,14 @@ My project: [DESCRIBE YOUR PROJECT HERE]`;
 
       <!-- Title -->
       <div class="field full">
-        <label>Title</label>
-        <input type="text" bind:value={title} />
+        <label for="fld_3l5pfw">Title</label>
+        <input id="fld_3l5pfw" type="text" bind:value={title} />
       </div>
 
       <!-- Category + Status -->
       <div class="field">
-        <label>Category</label>
-        <select bind:value={category}>
+        <label for="fld_vmcfga">Category</label>
+        <select id="fld_vmcfga" bind:value={category}>
           <option value="dev">Dev</option>
           <option value="digital">Digital</option>
           <option value="pfe">Academic</option>
@@ -288,8 +288,8 @@ My project: [DESCRIBE YOUR PROJECT HERE]`;
       </div>
 
       <div class="field">
-        <label>Status</label>
-        <select bind:value={status}>
+        <label for="fld_ucehty">Status</label>
+        <select id="fld_ucehty" bind:value={status}>
           <option value="Live">Live</option>
           <option value="In Progress">In Progress</option>
           <option value="Case Study">Case Study</option>
@@ -298,8 +298,8 @@ My project: [DESCRIBE YOUR PROJECT HERE]`;
 
       <!-- Tags -->
       <div class="field full">
-        <label>Tags <span class="field-hint">comma separated</span></label>
-        <input type="text" bind:value={tagsStr} placeholder="SvelteKit, Firebase, Node.js" />
+        <label for="fld_i4be94">Tags <span class="field-hint">comma separated</span></label>
+        <input id="fld_i4be94" type="text" bind:value={tagsStr} placeholder="SvelteKit, Firebase, Node.js" />
       </div>
 
       <!-- AI Generator Tool -->
@@ -333,21 +333,21 @@ My project: [DESCRIBE YOUR PROJECT HERE]`;
 
       <!-- Description -->
       <div class="field full">
-        <label>Description</label>
-        <textarea rows="3" bind:value={description}></textarea>
+        <label for="fld_1xzkko">Description</label>
+        <textarea id="fld_1xzkko" rows="3" bind:value={description}></textarea>
       </div>
 
       <!-- Article -->
       <div class="field full">
-        <label>Article <span class="field-hint">Markdown</span></label>
-        <textarea class="article-area" rows="14" bind:value={article}></textarea>
+        <label for="fld_5jrqjk">Article <span class="field-hint">Markdown</span></label>
+        <textarea id="fld_5jrqjk" class="article-area" rows="14" bind:value={article}></textarea>
       </div>
 
       <!-- Stack (dev only) -->
       {#if category === 'dev'}
         <div class="field full">
-          <label>Stack <span class="field-hint">comma separated</span></label>
-          <input type="text" bind:value={stackStr} placeholder="SvelteKit, Firebase, Vercel" />
+          <label for="fld_jeff1f">Stack <span class="field-hint">comma separated</span></label>
+        <input id="fld_jeff1f" type="text" bind:value={stackStr} placeholder="SvelteKit, Firebase, Vercel" />
         </div>
       {/if}
 
@@ -373,29 +373,29 @@ My project: [DESCRIBE YOUR PROJECT HERE]`;
 
       <!-- Links -->
       <div class="field">
-        <label>GitHub URL</label>
-        <input type="url" bind:value={githubUrl} placeholder="https://github.com/user/repo" />
+        <label for="fld_0xmpw2">GitHub URL</label>
+        <input id="fld_0xmpw2" type="url" bind:value={githubUrl} placeholder="https://github.com/user/repo" />
       </div>
 
       <div class="field">
-        <label>Demo URL</label>
-        <input type="url" bind:value={demoUrl} placeholder="https://project.vercel.app" />
+        <label for="fld_1up5zx">Demo URL</label>
+        <input id="fld_1up5zx" type="url" bind:value={demoUrl} placeholder="https://project.vercel.app" />
       </div>
 
       <div class="field full">
-        <label>Loom URL</label>
-        <input type="url" bind:value={loomUrl} placeholder="https://www.loom.com/share/..." />
+        <label for="fld_nli0o9">Loom URL</label>
+        <input id="fld_nli0o9" type="url" bind:value={loomUrl} placeholder="https://www.loom.com/share/..." />
       </div>
 
       <!-- Preview Platform Button -->
       <div class="field">
-        <label>Preview Platform URL <span class="field-hint">Actual platform website</span></label>
-        <input type="url" bind:value={previewUrl} placeholder="https://myplatform.com" />
+        <label for="fld_x134kl">Preview Platform URL <span class="field-hint">Actual platform website</span></label>
+        <input id="fld_x134kl" type="url" bind:value={previewUrl} placeholder="https://myplatform.com" />
       </div>
 
       <div class="field">
-        <label>Preview Button Label <span class="field-hint">Text shown on button (e.g. Visit Platform, Open App)</span></label>
-        <input type="text" bind:value={previewLabel} placeholder="Visit Platform" />
+        <label for="fld_tgj9xq">Preview Button Label <span class="field-hint">Text shown on button (e.g. Visit Platform, Open App)</span></label>
+        <input id="fld_tgj9xq" type="text" bind:value={previewLabel} placeholder="Visit Platform" />
       </div>
 
       <!-- Image upload -->
@@ -702,14 +702,14 @@ My project: [DESCRIBE YOUR PROJECT HERE]`;
 
   .image-preview img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
-  .filename-hint {
+  /* removed */
     font-family: var(--font-body);
     font-size: 0.75rem;
     color: var(--text-muted);
     line-height: 1.6;
   }
 
-  .filename-hint code {
+  /* removed */ {
     font-size: 0.78rem;
     color: var(--accent);
     font-family: 'Courier New', monospace;
@@ -722,7 +722,7 @@ My project: [DESCRIBE YOUR PROJECT HERE]`;
     color: var(--text-muted);
     margin-top: 0.4rem;
   }
-  .upload-status code  { color: var(--accent); font-family: 'Courier New', monospace; }
+  /* removed */  { color: var(--accent); font-family: 'Courier New', monospace; }
   .upload-status.done  { color: #38a169; }
   .upload-status.error { color: #e53e3e; }
 

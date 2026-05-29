@@ -203,14 +203,14 @@
 
       <!-- Title -->
       <div class="field full">
-        <label>Title</label>
-        <input type="text" bind:value={title} />
+        <label for="fld_h0rb4z">Title</label>
+        <input id="fld_h0rb4z" type="text" bind:value={title} />
       </div>
 
       <!-- Category + Status -->
       <div class="field">
-        <label>Category</label>
-        <select bind:value={category}>
+        <label for="fld_qar9x1">Category</label>
+        <select id="fld_qar9x1" bind:value={category}>
           <option value="dev">Dev</option>
           <option value="digital">Digital</option>
           <option value="pfe">Academic</option>
@@ -218,8 +218,8 @@
       </div>
 
       <div class="field">
-        <label>Status</label>
-        <select bind:value={status}>
+        <label for="fld_h003j0">Status</label>
+        <select id="fld_h003j0" bind:value={status}>
           <option value="Live">Live</option>
           <option value="In Progress">In Progress</option>
           <option value="Case Study">Case Study</option>
@@ -228,8 +228,8 @@
 
       <!-- Tags -->
       <div class="field full">
-        <label>Tags <span class="field-hint">comma separated</span></label>
-        <input type="text" bind:value={tagsStr} placeholder="SvelteKit, Firebase, Node.js" />
+        <label for="fld_jz1l3v">Tags <span class="field-hint">comma separated</span></label>
+        <input id="fld_jz1l3v" type="text" bind:value={tagsStr} placeholder="SvelteKit, Firebase, Node.js" />
       </div>
 
       <!-- AI Generator Tool -->
@@ -263,21 +263,21 @@
 
       <!-- Description -->
       <div class="field full">
-        <label>Description</label>
-        <textarea rows="3" bind:value={description}></textarea>
+        <label for="fld_1hx4ew">Description</label>
+        <textarea id="fld_1hx4ew" rows="3" bind:value={description}></textarea>
       </div>
 
       <!-- Article -->
       <div class="field full">
-        <label>Article <span class="field-hint">Markdown</span></label>
-        <textarea class="article-area" rows="14" bind:value={article}></textarea>
+        <label for="fld_jer577">Article <span class="field-hint">Markdown</span></label>
+        <textarea id="fld_jer577" class="article-area" rows="14" bind:value={article}></textarea>
       </div>
 
       <!-- Stack (dev only) -->
       {#if category === 'dev'}
         <div class="field full">
-          <label>Stack <span class="field-hint">comma separated</span></label>
-          <input type="text" bind:value={stackStr} placeholder="SvelteKit, Firebase, Vercel" />
+          <label for="fld_y9uq8y">Stack <span class="field-hint">comma separated</span></label>
+        <input id="fld_y9uq8y" type="text" bind:value={stackStr} placeholder="SvelteKit, Firebase, Vercel" />
         </div>
       {/if}
 
@@ -303,29 +303,29 @@
 
       <!-- Links -->
       <div class="field">
-        <label>GitHub URL</label>
-        <input type="url" bind:value={githubUrl} placeholder="https://github.com/user/repo" />
+        <label for="fld_h9b6e0">GitHub URL</label>
+        <input id="fld_h9b6e0" type="url" bind:value={githubUrl} placeholder="https://github.com/user/repo" />
       </div>
 
       <div class="field">
-        <label>Demo URL</label>
-        <input type="url" bind:value={demoUrl} placeholder="https://project.vercel.app" />
+        <label for="fld_0kmxh4">Demo URL</label>
+        <input id="fld_0kmxh4" type="url" bind:value={demoUrl} placeholder="https://project.vercel.app" />
       </div>
 
       <div class="field full">
-        <label>Loom URL</label>
-        <input type="url" bind:value={loomUrl} placeholder="https://www.loom.com/share/..." />
+        <label for="fld_sro07a">Loom URL</label>
+        <input id="fld_sro07a" type="url" bind:value={loomUrl} placeholder="https://www.loom.com/share/..." />
       </div>
 
       <!-- Preview Platform Button -->
       <div class="field">
-        <label>Preview Platform URL <span class="field-hint">Actual platform website</span></label>
-        <input type="url" bind:value={previewUrl} placeholder="https://myplatform.com" />
+        <label for="fld_q90f1f">Preview Platform URL <span class="field-hint">Actual platform website</span></label>
+        <input id="fld_q90f1f" type="url" bind:value={previewUrl} placeholder="https://myplatform.com" />
       </div>
 
       <div class="field">
-        <label>Preview Button Label <span class="field-hint">Text shown on button (e.g. Visit Platform, Open App)</span></label>
-        <input type="text" bind:value={previewLabel} placeholder="Visit Platform" />
+        <label for="fld_kjm4w7">Preview Button Label <span class="field-hint">Text shown on button (e.g. Visit Platform, Open App)</span></label>
+        <input id="fld_kjm4w7" type="text" bind:value={previewLabel} placeholder="Visit Platform" />
       </div>
 
       <!-- Image upload -->
@@ -518,15 +518,15 @@
   .image-preview { margin-top: 0.5rem; width: 160px; height: 90px; background: var(--bg-card); overflow: hidden; }
   .image-preview img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
-  .filename-hint {
+  /* removed */
     font-family: var(--font-body);
     font-size: 0.75rem;
     color: var(--text-muted);
     line-height: 1.6;
   }
 
-  .filename-hint code { font-size: 0.78rem; color: var(--accent); font-family: 'Courier New', monospace; }
-  .filename-hint.current { margin-top: 0.4rem; }
+  /* removed */ { font-size: 0.78rem; color: var(--accent); font-family: 'Courier New', monospace; }
+  /* removed */ { margin-top: 0.4rem; }
 
   /* Current thumbnail overlay badge */
   .image-preview.current-thumb { position: relative; }
@@ -551,7 +551,7 @@
     color: var(--text-muted);
     margin-top: 0.4rem;
   }
-  .upload-status code { color: var(--accent); font-family: 'Courier New', monospace; }
+  /* removed */ { color: var(--accent); font-family: 'Courier New', monospace; }
   .upload-status.done  { color: #38a169; }
   .upload-status.error { color: #e53e3e; }
 
