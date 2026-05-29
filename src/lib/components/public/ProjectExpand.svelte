@@ -2,6 +2,7 @@
   import { tick } from 'svelte';
   import { animate } from 'motion';
   import { marked } from 'marked';
+  import { thumb } from '$lib/utils/images.js';
 
   /**
    * @type {{
@@ -56,7 +57,7 @@
 
 {#if open && project}
   <!-- Backdrop -->
-  <div class="backdrop" onclick={onBackdropClick} role="dialog" aria-modal="true" aria-label={project.title} tabindex="-1">
+  <div class="backdrop" onclick={onBackdropClick} onkeydown={(e) => e.key === 'Escape' && onclose?.()} role="dialog" aria-modal="true" aria-label={project.title} tabindex="-1">
 
     <!-- Modal -->
     <div class="modal" bind:this={modalEl}>
@@ -66,7 +67,7 @@
 
       <!-- Hero image -->
       <div class="hero-img">
-        <img src="/images/projects/{project.id}-1.webp" alt={project.title} />
+        <img src={project.thumbUrl || thumb(project.slug ?? project.id)} alt={project.title} />
       </div>
 
       <div class="modal-body">
@@ -108,8 +109,13 @@
         {/if}
 
         <!-- Links -->
-        {#if project.links?.github || project.links?.demo || project.links?.loom}
+        {#if project.links?.github || project.links?.demo || project.links?.loom || project.links?.preview}
           <div class="links">
+            {#if project.links.preview}
+              <a href={project.links.preview} class="link-btn preview-btn" target="_blank" rel="noopener noreferrer">
+                {project.links.previewLabel || 'Visit Platform'}
+              </a>
+            {/if}
             {#if project.links.github}
               <a href={project.links.github} class="link-btn" target="_blank" rel="noopener noreferrer">GitHub</a>
             {/if}
@@ -349,12 +355,22 @@
     font-weight: 600;
     text-decoration: none;
     letter-spacing: 0.02em;
-    transition: background-color 0.18s ease, color 0.18s ease;
+    transition: background-color 0.18s ease, color 0.18s ease, border-color 0.18s ease;
   }
 
   .link-btn:hover {
     background: var(--accent);
     color: #fff;
+  }
+
+  .link-btn.preview-btn {
+    background: var(--accent);
+    color: #fff;
+  }
+
+  .link-btn.preview-btn:hover {
+    background: transparent;
+    color: var(--accent);
   }
 
   /* ── Article markdown ────────────────────────── */

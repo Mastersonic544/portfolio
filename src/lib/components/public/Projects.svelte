@@ -1,12 +1,11 @@
 <script>
   import { onMount } from 'svelte';
-  import { derived } from 'svelte/store';
+  import { collection, getDocs } from 'firebase/firestore';
+  import { db } from '$lib/firebase.js';
   import { activeCategory, activeTag } from '$lib/stores/projects.js';
   import { logClick } from '$lib/utils/analytics.js';
   import ProjectCard from '$lib/components/public/ProjectCard.svelte';
   import ProjectExpand from '$lib/components/public/ProjectExpand.svelte';
-
-  /** @typedef {import('$lib/stores/projects.js').Project} Project */
 
   /** @type {Record<string, string[]>} */
   const tagsByCategory = {
@@ -18,90 +17,37 @@
 
   const validCategories = new Set(Object.keys(tagsByCategory).filter(Boolean));
 
-  /** @type {Project[]} */
-  const mockProjects = [
-    {
-      id: 'shifters-2024',
-      title: 'Shifters Hackathon Platform',
-      slug: 'shifters-hackathon',
-      category: 'dev',
-      tags: ['SvelteKit', 'Firebase', 'Node.js', 'Firestore'],
-      description:
-        'A full-stack hackathon management platform built for the Shifters community. Handles team registration, project submissions, and live leaderboards.',
-      imageCount: 4,
-      kpis: [
-        { label: 'Teams',       value: '48' },
-        { label: 'Submissions', value: '32' },
-        { label: 'Built in',    value: '72h' }
-      ],
-      status: 'Live',
-      stack: ['SvelteKit', 'Firebase', 'Firestore', 'Node.js', 'Vercel'],
-      links: { github: '#', demo: '#' },
-      article:
-        "## Overview\n\nBuilt for the Shifters hackathon in Sfax, this platform handled registration, judging, and live results for 48 competing teams.\n\n## Key Decisions\n\nFirestore real-time listeners drove the leaderboard — no polling, no WebSockets. Every judge's score propagated in under 300 ms."
-    },
-    {
-      id: 'enet-brand',
-      title: "ENET'Com Brand Identity",
-      slug: 'enet-brand',
-      category: 'digital',
-      tags: ['Figma', 'Branding', 'Motion', 'Logo'],
-      description:
-        "Complete brand identity redesign for ENET'Com engineering school. Includes logo system, motion templates, and visual guidelines.",
-      imageCount: 6,
-      kpis: [
-        { label: 'Assets',     value: '120+' },
-        { label: 'Guidelines', value: '42 pp.' },
-        { label: 'Delivery',   value: '3 wks' }
-      ],
-      status: 'Case Study',
-      stack: [],
-      links: { loom: '#' },
-      article:
-        "## The Challenge\n\nENET'Com needed a modern identity that would work for students, faculty, and industry partners simultaneously.\n\n## Outcome\n\nA modular logo system with 6 lockups, a motion language for social content, and a 42-page brand book with grid system and typography scale."
-    },
-    {
-      id: 'iot-greenhouse',
-      title: 'Smart Greenhouse System',
-      slug: 'iot-greenhouse',
-      category: 'pfe',
-      tags: ['IoT', 'ESP32', 'Python', 'Firebase', 'Arduino'],
-      description:
-        'Final-year engineering project — an autonomous greenhouse monitoring system with real-time sensor data, alerts, and remote control via mobile app.',
-      imageCount: 5,
-      kpis: [
-        { label: 'Sensors',  value: '8' },
-        { label: 'Uptime',   value: '99.2%' },
-        { label: 'Response', value: '<200ms' }
-      ],
-      status: 'In Progress',
-      stack: ['ESP32', 'MicroPython', 'Firebase RTDB', 'Flutter', 'Node.js'],
-      links: { github: '#' },
-      article:
-        '## Motivation\n\nSmart agriculture is transforming food production across North Africa. This PFE project explores automated monitoring and response at low cost.\n\n## Architecture\n\nESP32 sensors push to Firebase RTDB every 5 s. A Flutter mobile app renders live charts and sends push notifications when thresholds are crossed.'
-    }
-  ];
+  /** @type {any[]} */
+  let allProjects = $state([]);
+  let loading     = $state(true);
+  let search      = $state('');
+  let cat         = $state('');
+  let tag         = $state('');
 
-  const currentTags = derived(
-    activeCategory,
-    ($cat) => tagsByCategory[$cat] ?? tagsByCategory['']
+  let filtered = $derived(
+    allProjects.filter((p) => {
+      const catOk    = !cat || p.category === cat;
+      const tagOk    = !tag || (p.tags ?? []).includes(tag);
+      const searchOk = !search.trim() || p.title?.toLowerCase().includes(search.trim().toLowerCase());
+      return catOk && tagOk && searchOk && p.published !== false;
+    })
   );
 
-  const filteredProjects = derived(
-    [activeCategory, activeTag],
-    ([$cat, $tag]) =>
-      mockProjects.filter((p) => {
-        const catMatch = !$cat || p.category === $cat;
-        const tagMatch = !$tag || p.tags.includes($tag);
-        return catMatch && tagMatch;
-      })
-  );
+  let currentTags = $derived(tagsByCategory[cat] ?? tagsByCategory['']);
 
-  /** @type {Project | null} */
+  /** @type {HTMLElement | null} */
+  let carouselEl = $state(null);
+
+  /** @type {any} */
   let selectedProject = $state(null);
   let expandOpen = $state(false);
 
-  /** @param {Project} project */
+  const CARD_W = 316; // card width (290px) + gap (1.25rem ≈ 20px) + a few px
+
+  function scrollPrev() { carouselEl?.scrollBy({ left: -CARD_W, behavior: 'smooth' }); }
+  function scrollNext() { carouselEl?.scrollBy({ left:  CARD_W, behavior: 'smooth' }); }
+
+  /** @param {any} project */
   function handleOpen(project) {
     selectedProject = project;
     expandOpen = true;
@@ -120,27 +66,37 @@
     activeTag.set('');
   }
 
-  /** @param {string} tag */
-  function toggleTag(tag) {
-    activeTag.update((t) => (t === tag ? '' : tag));
+  /** @param {string} t */
+  function toggleTag(t) {
+    activeTag.update((v) => (v === t ? '' : t));
   }
 
-  onMount(() => {
+  onMount(async () => {
     logClick('projects');
+
+    const unsubCat = activeCategory.subscribe((v) => { cat = v; });
+    const unsubTag = activeTag.subscribe((v)  => { tag = v; });
+
     // Pre-apply ?category= query param
     const params = new URLSearchParams(window.location.search);
-    const cat = params.get('category');
-    if (cat && validCategories.has(cat)) activeCategory.set(cat);
+    const qCat   = params.get('category');
+    if (qCat && validCategories.has(qCat)) activeCategory.set(qCat);
 
-    // Deep-link to a project via URL hash (#slug)
+    try {
+      const snap  = await getDocs(collection(db, 'projects'));
+      allProjects = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    } catch (_) { /* show empty */ }
+
+    loading = false;
+
+    // Deep-link via hash
     const hash = window.location.hash.slice(1);
     if (hash) {
-      const project = mockProjects.find((p) => p.slug === hash);
-      if (project) {
-        selectedProject = project;
-        expandOpen = true;
-      }
+      const match = allProjects.find((p) => p.slug === hash);
+      if (match) { selectedProject = match; expandOpen = true; }
     }
+
+    return () => { unsubCat(); unsubTag(); };
   });
 </script>
 
@@ -148,43 +104,64 @@
   <span class="section-label">Work</span>
   <h2 class="section-title">Discover My Work</h2>
 
-  <!-- Filters bar -->
+  <!-- Filter bar -->
   <div class="filters">
     <div class="select-wrap">
-      <select class="category-select" value={$activeCategory} onchange={onCategoryChange}>
+      <select class="category-select" value={cat} onchange={onCategoryChange}>
         <option value="">All</option>
         <option value="digital">Digital</option>
         <option value="dev">Dev</option>
         <option value="pfe">Academic</option>
       </select>
+      <span class="select-arrow">▾</span>
     </div>
 
     <div class="tag-row">
-      {#each $currentTags as tag}
+      {#each currentTags as t}
         <button
           class="tag-btn"
-          class:active={$activeTag === tag}
-          onclick={() => toggleTag(tag)}
-        >{tag}</button>
+          class:active={tag === t}
+          onclick={() => toggleTag(t)}
+        >{t}</button>
       {/each}
+    </div>
+
+    <div class="search-wrap">
+      <input
+        class="search-input"
+        type="search"
+        placeholder="Search projects…"
+        bind:value={search}
+      />
     </div>
   </div>
 
-  <!-- Project grid -->
-  {#if $filteredProjects.length > 0}
-    <div class="project-grid">
-      {#each $filteredProjects as project (project.id)}
-        <ProjectCard {project} onopen={handleOpen} />
-      {/each}
-    </div>
-  {:else}
+  <!-- Carousel -->
+  {#if loading}
+    <p class="hint">Loading projects…</p>
+  {:else if filtered.length === 0}
     <div class="empty-state">
       <span>No projects match this filter.</span>
     </div>
+  {:else}
+    <div class="carousel-outer">
+      <button class="nav-btn" onclick={scrollPrev} aria-label="Previous">&#8249;</button>
+
+      <div class="carousel" bind:this={carouselEl}>
+        {#each filtered as project (project.id)}
+          <div class="carousel-item">
+            <ProjectCard {project} onopen={handleOpen} />
+          </div>
+        {/each}
+      </div>
+
+      <button class="nav-btn" onclick={scrollNext} aria-label="Next">&#8250;</button>
+    </div>
+
+    <p class="count-hint">{filtered.length} project{filtered.length !== 1 ? 's' : ''}</p>
   {/if}
 </section>
 
-<!-- Expand modal — always mounted, shown/hidden internally -->
 <ProjectExpand project={selectedProject} open={expandOpen} onclose={handleClose} />
 
 <style>
@@ -215,31 +192,21 @@
     margin-bottom: 2.5rem;
   }
 
-  /* ── Filters bar ───────────────────────────── */
+  /* ── Filter bar ─────────────────────────────── */
   .filters {
     display: flex;
     align-items: center;
     gap: 1.25rem;
+    margin-bottom: 2rem;
     flex-wrap: wrap;
-    margin-bottom: 3rem;
   }
 
+  /* Category select */
   .select-wrap {
     position: relative;
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
     flex-shrink: 0;
-  }
-
-  .select-wrap::after {
-    content: '▾';
-    position: absolute;
-    right: 0.65rem;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--text-muted);
-    pointer-events: none;
-    font-size: 0.7rem;
-    line-height: 1;
   }
 
   .category-select {
@@ -248,24 +215,32 @@
     background: var(--bg);
     border: 1px solid var(--bg-card);
     color: var(--text);
-    padding: 0.5rem 2rem 0.5rem 0.875rem;
+    padding: 0.45rem 2rem 0.45rem 0.875rem;
     font-family: var(--font-body);
     font-size: 0.82rem;
     font-weight: 500;
     cursor: pointer;
     border-radius: 0;
+    outline: none;
     transition: border-color 0.2s ease;
   }
 
-  .category-select:focus {
-    outline: none;
-    border-color: var(--accent);
+  .category-select:focus { border-color: var(--accent); }
+
+  .select-arrow {
+    position: absolute;
+    right: 0.65rem;
+    pointer-events: none;
+    font-size: 0.65rem;
+    color: var(--text-muted);
   }
 
+  /* Tags */
   .tag-row {
     display: flex;
     flex-wrap: wrap;
     gap: 0.4rem;
+    flex: 1;
   }
 
   .tag-btn {
@@ -278,22 +253,101 @@
     font-size: 0.75rem;
     font-weight: 500;
     cursor: pointer;
-    transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
+    transition: color 0.15s ease, background-color 0.15s ease;
   }
 
-  .tag-btn:hover { color: var(--text); border-color: var(--bg-card); }
-  .tag-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .tag-btn:hover  { color: var(--text); }
+  .tag-btn.active { background: var(--accent); color: #fff; }
 
-  /* ── Project grid ──────────────────────────── */
-  .project-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.5rem;
+  /* Search */
+  .search-wrap { flex-shrink: 0; }
+
+  .search-input {
+    background: transparent;
+    border: 1px solid var(--bg-card);
+    color: var(--text);
+    padding: 0.45rem 0.875rem;
+    font-family: var(--font-body);
+    font-size: 0.82rem;
+    outline: none;
+    width: 200px;
+    transition: border-color 0.2s ease;
   }
 
-  /* ── Empty state ───────────────────────────── */
+  .search-input:focus { border-color: var(--accent); }
+
+  .search-input::placeholder { color: var(--text-muted); opacity: 0.6; }
+
+  /* Hide browser's native search cancel button */
+  .search-input::-webkit-search-cancel-button { display: none; }
+
+  /* ── Carousel ───────────────────────────────── */
+  .carousel-outer {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .carousel {
+    flex: 1;
+    display: flex;
+    gap: 1.25rem;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    padding-bottom: 0.75rem;
+    /* Hide scrollbar */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .carousel::-webkit-scrollbar { display: none; }
+
+  .carousel-item {
+    flex-shrink: 0;
+    width: 290px;
+    scroll-snap-align: start;
+  }
+
+  /* Nav buttons */
+  .nav-btn {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--bg-card);
+    border: 1px solid var(--bg-card);
+    color: var(--text);
+    font-size: 1.4rem;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+    align-self: center;
+  }
+
+  .nav-btn:hover { background: var(--text-muted); color: var(--bg); border-color: var(--text-muted); }
+
+  /* Count hint */
+  .count-hint {
+    font-family: var(--font-body);
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    margin-top: 1rem;
+    letter-spacing: 0.04em;
+  }
+
+  /* ── Empty / Loading ────────────────────────── */
+  .hint {
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+
   .empty-state {
-    min-height: 25vh;
+    min-height: 20vh;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -307,15 +361,22 @@
     letter-spacing: 0.04em;
   }
 
-  /* ── Responsive ────────────────────────────── */
-  @media (max-width: 1024px) {
-    .project-grid { grid-template-columns: repeat(2, 1fr); }
-  }
-
+  /* ── Mobile ─────────────────────────────────── */
   @media (max-width: 768px) {
     .projects { padding: 5rem 1.5rem 4rem; }
-    .filters { flex-direction: column; align-items: flex-start; gap: 0.875rem; }
-    .select-wrap, .category-select { width: 100%; }
-    .project-grid { grid-template-columns: 1fr; }
+
+    .filters { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
+
+    .search-wrap { width: 100%; }
+    .search-input { width: 100%; box-sizing: border-box; }
+
+    .carousel-item { width: 260px; }
+
+    .nav-btn { display: none; }
+  }
+
+  @media (max-width: 480px) {
+    .projects { padding: 4rem 16px 3rem; }
+    .carousel-item { width: min(260px, 80vw); }
   }
 </style>

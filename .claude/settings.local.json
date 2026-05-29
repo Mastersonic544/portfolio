@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(New-Item *)",
+      "Bash(npm install *)",
+      "Bash(timeout 15 npm run dev)",
+      "Bash(node -e \"import\\('@sveltejs/kit/vite'\\).then\\(m => console.log\\(Object.keys\\(m\\)\\)\\)\")",
+      "Bash(node -e \"import\\('@sveltejs/vite-plugin-svelte'\\).then\\(m => console.log\\(Object.keys\\(m\\)\\)\\)\")",
+      "Bash(timeout 18 npm run dev)",
+      "Bash(node -e \"const a = require\\('@vercel/analytics'\\); console.log\\(Object.keys\\(a\\)\\)\")",
+      "Bash(npm run *)",
+      "Bash(git init *)",
+      "Bash(git remote *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)"
+    ]
+  }
+}

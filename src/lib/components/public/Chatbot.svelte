@@ -14,6 +14,30 @@
   /** @type {HTMLElement | null} */
   let listEl = $state(null);
 
+  let typingInterval;
+
+  function triggerHaptic() {
+    try {
+      if (typeof navigator !== 'undefined' && navigator.vibrate) {
+        navigator.vibrate(10);
+      }
+    } catch (_) {
+      // Fail silently
+    }
+  }
+
+  // Periodic subtle haptic tick during the bot's loading/typing state
+  $effect(() => {
+    if (loading && open) {
+      typingInterval = setInterval(() => {
+        triggerHaptic();
+      }, 700);
+    } else {
+      clearInterval(typingInterval);
+    }
+    return () => clearInterval(typingInterval);
+  });
+
   function openChat() {
     open = true;
     tick().then(() => inputEl?.focus());
@@ -53,7 +77,22 @@
       if (!res.ok) throw new Error('api-error');
 
       const { reply } = await res.json();
-      messages = [...messages, { role: 'bot', text: reply }];
+      
+      // Create a bot message item with empty text
+      const botMsgIndex = messages.length;
+      messages = [...messages, { role: 'bot', text: '' }];
+      
+      // Type out character by character
+      let currentText = '';
+      for (let i = 0; i < reply.length; i++) {
+        currentText += reply[i];
+        messages[botMsgIndex].text = currentText;
+        triggerHaptic();
+        await tick();
+        scrollToBottom();
+        // Slightly randomized natural typing speed
+        await new Promise(r => setTimeout(r, 12 + Math.random() * 12));
+      }
     } catch {
       messages = [...messages, { role: 'bot', text: "Something went wrong — try again in a moment." }];
     } finally {
@@ -68,13 +107,16 @@
   }
 </script>
 
-<!-- Floating trigger -->
+<!-- Floating trigger (styled as a keyboard key, matching the portfolio.html Shift key style) -->
 <button
-  class="chat-trigger"
+  class="shift-key chat-trigger"
   onclick={openChat}
   aria-label="Open chat"
   aria-expanded={open}
->⇧</button>
+>
+  <span class="arrow">⇧</span>
+  <span>Chat</span>
+</button>
 
 <!-- Chat modal -->
 {#if open}
@@ -82,12 +124,15 @@
   <!-- svelte-ignore a11y_click_events_have_key_events -->
   <div class="backdrop" role="presentation" onclick={closeChat}></div>
 
-  <div class="chat-modal" role="dialog" aria-label="Chat with Shift" onkeydown={onKeydown}>
+  <div class="chat-modal" role="dialog" aria-label="Chat with Shift" tabindex="-1" onkeydown={onKeydown}>
     <!-- Header -->
     <div class="chat-header">
-      <div class="header-text">
-        <span class="chat-title">Ask Shift anything</span>
-        <span class="chat-disclaimer">Answers come from my actual CV and experience</span>
+      <div class="header-left">
+        <div class="chat-head-indicator"></div>
+        <div class="header-text">
+          <span class="chat-title">Ask the AI version of me</span>
+          <span class="chat-disclaimer">CV and experience questions</span>
+        </div>
       </div>
       <button class="close-btn" onclick={closeChat} aria-label="Close chat">✕</button>
     </div>
@@ -100,13 +145,13 @@
 
       {#each messages as msg}
         <div class="bubble-wrap" class:user={msg.role === 'user'} class:bot={msg.role === 'bot'}>
-          <div class="bubble">{msg.text}</div>
+          <div class="bubble {msg.role}">{msg.text}</div>
         </div>
       {/each}
 
-      {#if loading}
+      {#if loading && (!messages.length || messages[messages.length - 1].role !== 'bot' || messages[messages.length - 1].text === '')}
         <div class="bubble-wrap bot">
-          <div class="bubble typing">
+          <div class="bubble bot typing">
             <span></span><span></span><span></span>
           </div>
         </div>
@@ -131,33 +176,56 @@
 {/if}
 
 <style>
-  /* ── Trigger button (keyboard-key style, matches theme toggle) ── */
+  /* Keyboard Shift key style styling for the trigger */
   .chat-trigger {
     position: fixed;
     bottom: 1.5rem;
     right: 1.5rem;
     z-index: 200;
-    font-family: 'Courier New', Courier, monospace;
-    font-size: 1.1rem;
-    line-height: 1;
-    background: var(--bg);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-width: 96px;
+    height: 44px;
+    padding: 0 14px 0 12px;
+    background: var(--key-face);
     color: var(--text);
-    border: 1.5px solid var(--text-muted);
-    border-radius: 6px;
-    padding: 0.35rem 0.65rem;
-    box-shadow: 0 2.5px 0 var(--text-muted);
+    border: 1.5px solid var(--key-side);
+    border-bottom-width: 4px;
+    border-radius: 8px;
+    font-family: var(--font-body);
+    font-weight: 500;
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
     cursor: pointer;
     user-select: none;
-    transition:
-      background-color 0.3s ease,
-      color 0.3s ease,
-      box-shadow 0.08s ease,
-      transform 0.08s ease;
+    transition: transform 0.08s ease, border-bottom-width 0.08s ease,
+                background 0.4s ease, border-color 0.4s ease, color 0.4s ease;
   }
-
+  .chat-trigger:hover { background: var(--bg-card-hover); }
   .chat-trigger:active {
     transform: translateY(2px);
-    box-shadow: none;
+    border-bottom-width: 1.5px;
+  }
+  .chat-trigger .arrow {
+    font-weight: 700;
+    font-size: 13px;
+    line-height: 1;
+    transform: translateY(-1px);
+  }
+  .chat-trigger::after {
+    content: "";
+    position: absolute;
+    bottom: 3px;
+    left: 50%;
+    width: 12px;
+    height: 1.5px;
+    background: var(--text);
+    transform: translateX(-50%);
+    opacity: 0.25;
+    border-radius: 1px;
   }
 
   /* ── Backdrop ───────────────────────────────── */
@@ -174,11 +242,12 @@
     right: 1.5rem;
     z-index: 300;
     width: 360px;
-    height: 500px;
+    height: min(500px, 85dvh);
     display: flex;
     flex-direction: column;
-    background: var(--bg);
-    border: 1px solid var(--bg-card);
+    background: var(--bg-card);
+    border: 0.5px solid var(--border);
+    border-radius: 8px;
     box-shadow:
       0 4px 12px rgba(0, 0, 0, 0.08),
       0 16px 48px rgba(0, 0, 0, 0.14);
@@ -188,31 +257,53 @@
   /* ── Header ─────────────────────────────────── */
   .chat-header {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: space-between;
-    gap: 1rem;
-    padding: 1.125rem 1.25rem 1rem;
-    border-bottom: 1px solid var(--bg-card);
+    padding: 16px 20px;
+    border-bottom: 0.5px solid var(--border);
+    background: var(--bg-card);
     flex-shrink: 0;
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .chat-head-indicator {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 0 0 var(--accent);
+    animation: pulse-dot 2.4s ease-in-out infinite;
+    flex-shrink: 0;
+  }
+
+  @keyframes pulse-dot {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(255, 92, 0, 0.45); }
+    50%       { box-shadow: 0 0 0 8px rgba(255, 92, 0, 0); }
   }
 
   .header-text {
     display: flex;
     flex-direction: column;
-    gap: 0.2rem;
+    gap: 2px;
   }
 
   .chat-title {
-    font-family: var(--font-heading);
-    font-size: 1rem;
-    font-weight: 700;
+    font-family: var(--font-body);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
     color: var(--text);
-    letter-spacing: -0.02em;
   }
 
   .chat-disclaimer {
     font-family: var(--font-body);
-    font-size: 0.72rem;
+    font-size: 10px;
     color: var(--text-muted);
   }
 
@@ -220,13 +311,11 @@
     background: transparent;
     border: none;
     color: var(--text-muted);
-    font-size: 0.8rem;
+    font-size: 14px;
     cursor: pointer;
-    padding: 0.1rem 0.25rem;
     line-height: 1;
     transition: color 0.15s ease;
     flex-shrink: 0;
-    margin-top: 0.1rem;
   }
 
   .close-btn:hover { color: var(--text); }
@@ -235,16 +324,17 @@
   .message-list {
     flex: 1;
     overflow-y: auto;
-    padding: 1rem 1.25rem;
+    padding: 20px;
     display: flex;
     flex-direction: column;
-    gap: 0.625rem;
+    gap: 14px;
     scroll-behavior: smooth;
+    background: var(--bg-card);
   }
 
   .empty-hint {
     font-family: var(--font-body);
-    font-size: 0.82rem;
+    font-size: 13px;
     color: var(--text-muted);
     text-align: center;
     margin: auto;
@@ -254,6 +344,7 @@
 
   .bubble-wrap {
     display: flex;
+    width: 100%;
   }
 
   .bubble-wrap.user { justify-content: flex-end; }
@@ -261,21 +352,24 @@
 
   .bubble {
     max-width: 78%;
-    padding: 0.55rem 0.875rem;
+    padding: 10px 16px;
     font-family: var(--font-body);
-    font-size: 0.875rem;
-    line-height: 1.55;
+    font-size: 14px;
+    line-height: 1.5;
     word-break: break-word;
   }
 
-  .bubble-wrap.user .bubble {
+  .bubble.user {
     background: var(--accent);
-    color: #fff;
+    color: #FFF;
+    border-radius: 12px 12px 2px 12px;
   }
 
-  .bubble-wrap.bot .bubble {
-    background: var(--bg-card);
+  .bubble.bot {
+    background: var(--bg);
     color: var(--text);
+    border-radius: 12px 12px 12px 2px;
+    border: 0.5px solid var(--border);
   }
 
   /* ── Typing indicator ───────────────────────── */
@@ -283,7 +377,7 @@
     display: flex;
     align-items: center;
     gap: 4px;
-    padding: 0.65rem 0.875rem;
+    padding: 12px 16px;
   }
 
   .bubble.typing span {
@@ -307,8 +401,8 @@
   .input-row {
     display: flex;
     align-items: center;
-    gap: 0;
-    border-top: 1px solid var(--bg-card);
+    border-top: 0.5px solid var(--border);
+    background: var(--bg-card);
     flex-shrink: 0;
   }
 
@@ -317,15 +411,14 @@
     background: transparent;
     border: none;
     outline: none;
-    padding: 0.875rem 1.25rem;
+    padding: 14px 20px;
     font-family: var(--font-body);
-    font-size: 0.875rem;
+    font-size: 14px;
     color: var(--text);
   }
 
   .input-row input::placeholder {
-    color: var(--text-muted);
-    opacity: 0.6;
+    color: var(--text-hint);
   }
 
   .input-row input:disabled { opacity: 0.5; }
@@ -333,9 +426,9 @@
   .send-btn {
     background: transparent;
     border: none;
-    border-left: 1px solid var(--bg-card);
-    padding: 0.875rem 1.125rem;
-    font-size: 1rem;
+    border-left: 0.5px solid var(--border);
+    padding: 14px 20px;
+    font-size: 16px;
     color: var(--accent);
     cursor: pointer;
     transition: background-color 0.15s ease, opacity 0.15s ease;
@@ -343,7 +436,7 @@
     flex-shrink: 0;
   }
 
-  .send-btn:hover:not(:disabled) { background: var(--bg-card); }
+  .send-btn:hover:not(:disabled) { background: var(--bg-card-hover); }
   .send-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
   /* ── Mobile ─────────────────────────────────── */

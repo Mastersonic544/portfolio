@@ -2,6 +2,12 @@
   import { onMount } from 'svelte';
   import { collection, getDocs, updateDoc, doc, query, orderBy } from 'firebase/firestore';
   import { db } from '$lib/firebase.js';
+  import HeroEditor       from '$lib/components/admin/HeroEditor.svelte';
+  import AboutEditor      from '$lib/components/admin/AboutEditor.svelte';
+  import FaqEditor        from '$lib/components/admin/FaqEditor.svelte';
+  import ServicesEditor   from '$lib/components/admin/ServicesEditor.svelte';
+  import HighlightsEditor from '$lib/components/admin/HighlightsEditor.svelte';
+  import ContactEditor    from '$lib/components/admin/ContactEditor.svelte';
 
   /** @typedef {{ id: string; name: string; visible: boolean; order: number; content: Record<string, string> }} Section */
 
@@ -96,23 +102,37 @@
             </div>
           </div>
 
-          <!-- Right: content fields -->
-          {#if Object.keys(sec.content ?? {}).length > 0}
-            <div class="content-fields">
-              {#each Object.keys(sec.content) as key}
-                <div class="cf-row">
-                  <label class="cf-label" for="cf-{sec.id}-{key}">{key}</label>
-                  <input
-                    id="cf-{sec.id}-{key}"
-                    class="cf-input"
-                    type="text"
-                    value={sec.content[key]}
-                    onblur={(e) => saveField(sec, key, e.currentTarget.value)}
-                  />
-                </div>
-              {/each}
-            </div>
-          {/if}
+          <!-- Right: section-specific editor -->
+          <div class="section-editor">
+            {#if sec.name === 'hero'}
+              <HeroEditor section={sec} />
+            {:else if sec.name === 'about'}
+              <AboutEditor section={sec} />
+            {:else if sec.name === 'faq'}
+              <FaqEditor section={sec} />
+            {:else if sec.name === 'services'}
+              <ServicesEditor section={sec} />
+            {:else if sec.name === 'highlights'}
+              <HighlightsEditor section={sec} />
+            {:else if sec.name === 'contact'}
+              <ContactEditor section={sec} />
+            {:else if Object.keys(sec.content ?? {}).length > 0}
+              <div class="content-fields">
+                {#each Object.keys(sec.content) as key}
+                  <div class="cf-row">
+                    <label class="cf-label" for="cf-{sec.id}-{key}">{key}</label>
+                    <input
+                      id="cf-{sec.id}-{key}"
+                      class="cf-input"
+                      type="text"
+                      value={sec.content[key]}
+                      onblur={(e) => saveField(sec, key, e.currentTarget.value)}
+                    />
+                  </div>
+                {/each}
+              </div>
+            {/if}
+          </div>
 
         </div>
       {/each}
@@ -212,6 +232,12 @@
   .order-btns button:hover:not(:disabled) { background: var(--text-muted); color: var(--bg); }
   .order-btns button:disabled { opacity: 0.25; cursor: not-allowed; }
 
+  /* ── Section editor wrapper ─────────────────── */
+  .section-editor {
+    flex: 1;
+    min-width: 260px;
+  }
+
   /* ── Content fields ─────────────────────────── */
   .content-fields {
     flex: 1;
@@ -265,5 +291,13 @@
     font-family: var(--font-body);
     font-size: 0.9rem;
     color: var(--text);
+  }
+
+  @media (max-width: 640px) {
+    .sec-row { gap: 0.875rem; }
+    .sec-meta { min-width: 0; width: 100%; }
+    .section-editor { min-width: 0; width: 100%; }
+    .content-fields { min-width: 0; }
+    .cf-row { grid-template-columns: 90px 1fr; }
   }
 </style>

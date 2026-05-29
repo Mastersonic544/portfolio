@@ -3,6 +3,7 @@
   import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
   import { db } from '$lib/firebase.js';
   import { convertToWebP } from '$lib/utils/convertWebP.js';
+  import { uploadToStorage } from '$lib/utils/uploadToStorage.js';
 
   /* ── Wizard state ───────────────────────────── */
   let step        = $state(1);
@@ -22,14 +23,62 @@
   let githubUrl    = $state('');
   let demoUrl      = $state('');
   let loomUrl      = $state('');
+  let previewUrl   = $state('');
+  let previewLabel = $state('');
   let published    = $state(false);
 
   /* ── Image upload ───────────────────────────── */
   let imagePreviewUrl = $state('');
-  let imageCount      = $state(0);
+  let thumbUrl        = $state('');
+  let uploadStatus    = $state(/** @type {'idle'|'converting'|'uploading'|'done'|'error'} */ ('idle'));
 
   let saving      = $state(false);
   let saveError   = $state('');
+
+  /* ── AI Article Generator ────────────────── */
+  let aiContext    = $state('');
+  let aiGenerating = $state(false);
+  let aiGenError   = $state('');
+  let aiGenSuccess = $state(false);
+
+  async function generateArticleContent() {
+    if (aiGenerating) return;
+    aiGenerating = true;
+    aiGenError   = '';
+    aiGenSuccess = false;
+    try {
+      const res = await fetch('/api/generate-article', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: title.trim(),
+          category,
+          tags: tagsStr,
+          stack: stackStr,
+          kpis,
+          context: aiContext.trim()
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Generation failed');
+      }
+
+      if (data.description) description = data.description;
+      if (data.article) article = data.article;
+      if (data.kpis && Array.isArray(data.kpis)) {
+        kpis = data.kpis.map((k) => ({ label: k.label ?? '', value: k.value ?? '' }));
+      }
+      aiGenSuccess = true;
+    } catch (err) {
+      console.error(err);
+      aiGenError = err.message || 'Failed to generate article. Make sure OpenRouter key is set.';
+    } finally {
+      aiGenerating = false;
+    }
+  }
+
 
   /* ── AI prompt ──────────────────────────────── */
   const AI_PROMPT =
@@ -85,16 +134,28 @@ My project: [DESCRIBE YOUR PROJECT HERE]`;
     if (kpis.length > 1) kpis = kpis.filter((_, idx) => idx !== i);
   }
 
-  /** @param {Event & { currentTarget: HTMLInputElement }} e */
-  async function handleImageUpload(e) {
+  /** Converts the chosen image to WebP then POSTs it to the server so it lands in static/images/projects/ */
+  async function handleImageUpload(/** @type {Event & { currentTarget: HTMLInputElement }} */ e) {
     const file = e.currentTarget.files?.[0];
     if (!file) return;
+    uploadStatus = 'converting';
     try {
+      // Step 1 — convert to WebP in the browser
       const blob = await convertToWebP(file);
       if (imagePreviewUrl) URL.revokeObjectURL(imagePreviewUrl);
       imagePreviewUrl = URL.createObjectURL(blob);
-      imageCount      = 1;
-    } catch { /* skip */ }
+
+      // We need the slug to name the file — derive it live from the current title
+      const fileSlug = generatedSlug || 'project-thumb';
+      const filename  = `${fileSlug}-thumb.webp`;
+
+      // Step 2 — upload to Firebase Storage
+      uploadStatus = 'uploading';
+      thumbUrl     = await uploadToStorage(blob, 'projects', filename);
+      uploadStatus = 'done';
+    } catch {
+      uploadStatus = 'error';
+    }
   }
 
   /** @param {string} str */
@@ -117,6 +178,10 @@ My project: [DESCRIBE YOUR PROJECT HERE]`;
       if (githubUrl.trim()) links.github = githubUrl.trim();
       if (demoUrl.trim())   links.demo   = demoUrl.trim();
       if (loomUrl.trim())   links.loom   = loomUrl.trim();
+      if (previewUrl.trim()) {
+        links.preview      = previewUrl.trim();
+        links.previewLabel = previewLabel.trim() || 'Visit Platform';
+      }
 
       await addDoc(collection(db, 'projects'), {
         title:       title.trim(),
@@ -129,7 +194,7 @@ My project: [DESCRIBE YOUR PROJECT HERE]`;
         kpis:        kpis.filter((k) => k.label && k.value),
         status,
         links,
-        imageCount,
+        thumbUrl,
         published:   pub,
         createdAt:   serverTimestamp(),
         updatedAt:   serverTimestamp()
@@ -237,6 +302,35 @@ My project: [DESCRIBE YOUR PROJECT HERE]`;
         <input type="text" bind:value={tagsStr} placeholder="SvelteKit, Firebase, Node.js" />
       </div>
 
+      <!-- AI Generator Tool -->
+      <div class="field full ai-generator-box">
+        <div class="ai-generator-header">
+          <label>Google X-Y-Z Article Generator</label>
+          <span class="ai-badge">AI writer</span>
+        </div>
+        <div class="ai-generator-body">
+          <textarea
+            rows="2"
+            class="ai-context-input"
+            bind:value={aiContext}
+            placeholder="Add quick points (e.g. 'Optimized site speed by 40% using image WebP compression, built custom router in Node.js')"
+          ></textarea>
+          <button
+            type="button"
+            class="ai-gen-btn"
+            onclick={generateArticleContent}
+            disabled={aiGenerating || !title.trim()}
+          >
+            {aiGenerating ? 'Generating...' : '✨ Auto-Write Description & Article'}
+          </button>
+        </div>
+        {#if aiGenError}
+          <p class="ai-gen-error">{aiGenError}</p>
+        {:else if aiGenSuccess}
+          <p class="ai-gen-success">✓ Description &amp; Article successfully updated below!</p>
+        {/if}
+      </div>
+
       <!-- Description -->
       <div class="field full">
         <label>Description</label>
@@ -293,23 +387,42 @@ My project: [DESCRIBE YOUR PROJECT HERE]`;
         <input type="url" bind:value={loomUrl} placeholder="https://www.loom.com/share/..." />
       </div>
 
+      <!-- Preview Platform Button -->
+      <div class="field">
+        <label>Preview Platform URL <span class="field-hint">Actual platform website</span></label>
+        <input type="url" bind:value={previewUrl} placeholder="https://myplatform.com" />
+      </div>
+
+      <div class="field">
+        <label>Preview Button Label <span class="field-hint">Text shown on button (e.g. Visit Platform, Open App)</span></label>
+        <input type="text" bind:value={previewLabel} placeholder="Visit Platform" />
+      </div>
+
       <!-- Image upload -->
       <div class="field full">
-        <label>Thumbnail <span class="field-hint">any image — auto-converts to WebP</span></label>
+        <label for="thumbnail-input">Thumbnail <span class="field-hint">any image — auto-converts &amp; uploads to Firebase Storage as WebP</span></label>
         <input
+          id="thumbnail-input"
           type="file"
           accept="image/*"
           class="file-input"
           onchange={handleImageUpload}
+          disabled={uploadStatus === 'converting' || uploadStatus === 'uploading'}
         />
         {#if imagePreviewUrl}
           <div class="image-preview">
             <img src={imagePreviewUrl} alt="WebP preview" />
           </div>
-          <p class="filename-hint">
-            Save as <code>{generatedSlug || 'project-slug'}-thumb.webp</code>
-            to <code>/static/images/projects/</code> and push to repo
-          </p>
+        {/if}
+        <!-- Upload status feedback -->
+        {#if uploadStatus === 'converting'}
+          <p class="upload-status">Converting to WebP…</p>
+        {:else if uploadStatus === 'uploading'}
+          <p class="upload-status">Uploading to server…</p>
+        {:else if uploadStatus === 'done'}
+          <p class="upload-status done">✓ Uploaded to Firebase Storage</p>
+        {:else if uploadStatus === 'error'}
+          <p class="upload-status error">Upload failed — check the dev server is running.</p>
         {/if}
       </div>
 
@@ -600,6 +713,93 @@ My project: [DESCRIBE YOUR PROJECT HERE]`;
     font-size: 0.78rem;
     color: var(--accent);
     font-family: 'Courier New', monospace;
+  }
+
+  /* Upload status messages */
+  .upload-status {
+    font-family: var(--font-body);
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-top: 0.4rem;
+  }
+  .upload-status code  { color: var(--accent); font-family: 'Courier New', monospace; }
+  .upload-status.done  { color: #38a169; }
+  .upload-status.error { color: #e53e3e; }
+
+  /* AI Generator styles */
+  .ai-generator-box {
+    background: var(--bg-card);
+    border: 1px dashed var(--accent);
+    padding: 1.25rem;
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+  }
+  .ai-generator-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+  }
+  .ai-badge {
+    background: var(--accent);
+    color: #fff;
+    font-size: 0.6rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 2px 6px;
+    border-radius: 3px;
+  }
+  .ai-generator-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  .ai-context-input {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 0.6rem;
+    font-size: 0.85rem;
+    border-radius: 3px;
+    outline: none;
+    resize: vertical;
+    width: 100%;
+  }
+  .ai-context-input:focus {
+    border-color: var(--accent);
+  }
+  .ai-gen-btn {
+    align-self: flex-start;
+    background: var(--text);
+    color: var(--bg);
+    border: none;
+    padding: 0.5rem 1.2rem;
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 0.8rem;
+    cursor: pointer;
+    border-radius: 3px;
+    transition: opacity 0.2s ease;
+  }
+  .ai-gen-btn:hover:not(:disabled) {
+    opacity: 0.9;
+  }
+  .ai-gen-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+  .ai-gen-error {
+    font-family: var(--font-body);
+    font-size: 0.78rem;
+    color: #e53e3e;
+    margin-top: 0.5rem;
+  }
+  .ai-gen-success {
+    font-family: var(--font-body);
+    font-size: 0.78rem;
+    color: #38a169;
+    margin-top: 0.5rem;
   }
 
   /* Published toggle */

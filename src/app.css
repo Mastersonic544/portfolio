@@ -3,17 +3,28 @@
 @import '@fontsource/syne/500.css';
 @import '@fontsource/syne/600.css';
 @import '@fontsource/syne/700.css';
+@import '@fontsource/syne/800.css';
 @import '@fontsource/space-grotesk/300.css';
 @import '@fontsource/space-grotesk/400.css';
 @import '@fontsource/space-grotesk/500.css';
 @import '@fontsource/space-grotesk/600.css';
+@import '@fontsource/space-grotesk/700.css';
+@import '@fontsource/caveat/400.css';
+@import '@fontsource/caveat/700.css';
 
 :root {
   --bg: #FAFAF8;
   --bg-card: #F2F0EB;
+  --bg-card-hover: #ECEAE4;
   --accent: #FF5C00;
+  --accent-hover: #E05200;
   --text: #0D0D0D;
   --text-muted: #6B6B6B;
+  --text-hint: #A0A0A0;
+  --border: rgba(13, 13, 13, 0.10);
+  --border-hover: rgba(13, 13, 13, 0.20);
+  --key-face: #F2F0EB;
+  --key-side: #0D0D0D;
   --dark-bg: #1A1A1A;
   --dark-surface: #242424;
   --dark-text: #FAFAF8;
@@ -35,6 +46,7 @@ body {
   color: var(--text);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
 }
 
 h1,
@@ -51,6 +63,52 @@ h6 {
 html.dark {
   --bg: #1A1A1A;
   --bg-card: #242424;
+  --bg-card-hover: #2C2C2C;
+  --accent: #FF5C00;
+  --accent-hover: #FF7A2E;
   --text: #FAFAF8;
   --text-muted: #9A9A9A;
+  --text-hint: #5A5A5A;
+  --border: rgba(250, 250, 248, 0.08);
+  --border-hover: rgba(250, 250, 248, 0.18);
+  --key-face: #242424;
+  --key-side: #FAFAF8;
+}
+
+/* ── Global keyframes ───────────────────────────────────────── */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes rise {
+  to { transform: translateY(0); }
+}
+
+@keyframes ghost-in {
+  from { opacity: 0; transform: translateY(40px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse-dot {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 92, 0, 0.45); }
+  50%       { box-shadow: 0 0 0 8px rgba(255, 92, 0, 0); }
+}
+
+@keyframes blink-cursor {
+  50% { opacity: 0; }
+}
+
+@keyframes marquee-left {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001s !important;
+    animation-delay: 0s !important;
+    transition-duration: 0.001s !important;
+  }
 }

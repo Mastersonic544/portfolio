@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Recurse -Path src)",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "Bash(Sort-Object)",
+      "Bash(mkdir -p \"c:\\\\Users\\\\djla7\\\\Downloads\\\\shift-portfolio\\\\src\\\\routes\\\\shift-admin\\\\projects\\\\edit\\\\[id]\")",
+      "Bash(node seed-projects.mjs)",
+      "Bash(node seed-sections.mjs)"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\djla7\\Downloads\\shift-portfolio\\src\\routes\\shift-admin\\projects\\edit"
+    ]
+  }
+}

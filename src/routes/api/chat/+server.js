@@ -1,5 +1,5 @@
 import { json, error } from '@sveltejs/kit';
-import { OPENROUTER_API_KEY } from '$env/static/private';
+import { OPENROUTER_API_KEY } from '$env/dynamic/private';
 
 // TODO: Replace this placeholder with your actual profile JSON
 const PROFILE_CONTEXT = `PROFILE_JSON_PLACEHOLDER`;
@@ -25,7 +25,7 @@ export async function POST({ request }) {
       'X-Title': 'Shift Portfolio'
     },
     body: JSON.stringify({
-      model: 'meta-llama/llama-3-8b-instruct:free',
+      model: 'openrouter/auto',
       messages: [
         { role: 'system', content: SYSTEM_PROMPT },
         { role: 'user',   content: message }

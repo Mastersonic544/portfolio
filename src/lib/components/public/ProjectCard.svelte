@@ -6,25 +6,27 @@
 
   const statusClass = {
     'Live':        'live',
-    'In Progress': 'in-progress',
-    'Case Study':  'case-study'
+    'In Progress': 'progress',
+    'Case Study':  'case'
   };
 </script>
 
 <article
   class="card"
-  role="button"
   tabindex="0"
   onclick={() => onopen?.(project)}
-  onkeydown={(e) => e.key === 'Enter' && onopen?.(project)}
+  onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && onopen?.(project)}
 >
   <div class="thumbnail">
-    <img src={thumb(project.id)} alt={project.title} loading="lazy" />
+    <img src={project.thumbUrl || thumb(project.slug ?? project.id)} alt={project.title} loading="lazy" />
   </div>
 
   <div class="body">
     <div class="meta">
-      <span class="status {statusClass[project.status] ?? 'case-study'}">{project.status}</span>
+      <span class="status {statusClass[project.status] ?? 'case'}">{project.status}</span>
+      {#if project.client || project.year}
+        <span class="info">{[project.client, project.year].filter(Boolean).join(' · ')}</span>
+      {/if}
     </div>
 
     <h3 class="title">{project.title}</h3>
@@ -35,13 +37,17 @@
         <span class="tag">{tag}</span>
       {/each}
     </div>
+
+    <span class="project-arrow">
+      {project.status === 'Live' ? 'See it live' : project.status === 'Case Study' ? 'Read case study' : 'Read details'} →
+    </span>
   </div>
 </article>
 
 <style>
   .card {
     background: var(--bg-card);
-    border: 1px solid transparent;
+    border: 0.5px solid var(--border);
     border-radius: 8px;
     overflow: hidden;
     cursor: pointer;
@@ -49,8 +55,8 @@
     display: flex;
     flex-direction: column;
     transition:
-      border-color 0.2s ease,
-      transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+      border-color 0.25s ease,
+      transform 0.25s ease;
   }
 
   .card:hover,
@@ -61,10 +67,18 @@
 
   /* ── Thumbnail ───────────────────────────────── */
   .thumbnail {
-    width: 100%;
+    position: relative;
     aspect-ratio: 16 / 9;
     overflow: hidden;
-    background: var(--bg);
+    border-bottom: 0.5px solid var(--border);
+    background:
+      repeating-linear-gradient(
+        135deg,
+        var(--bg-card) 0,
+        var(--bg-card) 11px,
+        var(--bg-card-hover) 11px,
+        var(--bg-card-hover) 12px
+      );
     flex-shrink: 0;
   }
 
@@ -82,51 +96,75 @@
 
   /* ── Body ────────────────────────────────────── */
   .body {
-    padding: 1.125rem 1.25rem 1.25rem;
+    padding: 28px 28px 32px;
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 14px;
     flex: 1;
   }
 
   .meta {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 16px;
+    font-family: var(--font-body);
+    font-weight: 500;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .info {
+    color: var(--text-muted);
   }
 
   /* ── Status badge ────────────────────────────── */
   .status {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
     font-family: var(--font-body);
-    font-size: 0.62rem;
-    font-weight: 700;
+    font-size: 11px;
+    font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.12em;
-    background: var(--bg);
-    padding: 0.18rem 0.45rem;
-    border-radius: 3px;
   }
 
-  .status.live        { color: var(--accent); }
-  .status.in-progress { color: var(--text-muted); }
-  .status.case-study  { color: var(--text-muted); }
+  .status.live {
+    color: var(--accent);
+  }
+  .status.live::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+  }
+  .status.progress,
+  .status.case {
+    color: var(--text-muted);
+  }
 
   /* ── Title ───────────────────────────────────── */
   .title {
     font-family: var(--font-heading);
     font-size: 1.15rem;
     font-weight: 700;
-    letter-spacing: -0.02em;
-    line-height: 1.25;
+    letter-spacing: -0.01em;
+    line-height: 1.15;
     color: var(--text);
+    margin: 0;
   }
 
   /* ── Description ─────────────────────────────── */
   .description {
     font-family: var(--font-body);
-    font-size: 0.82rem;
-    line-height: 1.65;
+    font-weight: 300;
+    font-size: 14px;
+    line-height: 1.6;
     color: var(--text-muted);
+    margin: 0;
     display: -webkit-box;
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
@@ -138,18 +176,39 @@
   .tags {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.3rem;
-    margin-top: 0.25rem;
+    gap: 8px;
+    margin-top: 4px;
   }
 
   .tag {
     display: inline-block;
     background: var(--bg);
     color: var(--text);
-    padding: 0.2rem 0.5rem;
-    border-radius: 4px;
+    padding: 5px 12px;
+    border-radius: 3px;
+    border: 0.5px solid var(--border);
     font-family: var(--font-body);
-    font-size: 0.7rem;
+    font-size: 12px;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+  }
+
+  /* ── Project Arrow ────────────────────────────── */
+  .project-arrow {
+    margin-top: 8px;
+    font-family: var(--font-body);
     font-weight: 500;
+    font-size: 13px;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: color 0.2s ease, gap 0.2s ease;
+  }
+
+  .card:hover .project-arrow {
+    color: var(--accent);
+    gap: 14px;
   }
 </style>

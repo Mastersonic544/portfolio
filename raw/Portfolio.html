@@ -1,0 +1,1642 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Yassine Dhouib — Portfolio · Built, not bought.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Space+Grotesk:wght@300;400;500;700&family=Caveat&display=swap" rel="stylesheet" />
+<style>
+  /* ============================================================
+     Tokens — lifted from Yassine's design system
+     ============================================================ */
+  :root, :root[data-theme="light"] {
+    --bg: #FAFAF8;
+    --bg-card: #F2F0EB;
+    --bg-card-hover: #ECEAE4;
+    --accent: #FF5C00;
+    --accent-hover: #E05200;
+    --text: #0D0D0D;
+    --text-muted: #6B6B6B;
+    --text-hint: #A0A0A0;
+    --border: rgba(13,13,13,0.10);
+    --border-hover: rgba(13,13,13,0.20);
+    --key-face: #F2F0EB;
+    --key-side: #0D0D0D;
+  }
+  :root[data-theme="dark"] {
+    --bg: #1A1A1A;
+    --bg-card: #242424;
+    --bg-card-hover: #2C2C2C;
+    --accent: #FF5C00;
+    --accent-hover: #FF7A2E;
+    --text: #FAFAF8;
+    --text-muted: #9A9A9A;
+    --text-hint: #5A5A5A;
+    --border: rgba(250,250,248,0.08);
+    --border-hover: rgba(250,250,248,0.18);
+    --key-face: #242424;
+    --key-side: #FAFAF8;
+  }
+
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    transition: background 0.4s ease, color 0.4s ease;
+  }
+  body { min-height: 100vh; overflow-x: hidden; }
+
+  /* ============================================================
+     Top meta bar
+     ============================================================ */
+  .topbar {
+    position: fixed; top: 0; left: 0; right: 0;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 28px 60px;
+    z-index: 50;
+    pointer-events: none;
+  }
+  .topbar > * { pointer-events: auto; }
+  .topbar-left {
+    display: flex; align-items: center; gap: 14px;
+    font-family: 'Space Grotesk';
+    font-weight: 400; font-size: 11px;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .topbar-mark {
+    font-family: 'Syne'; font-weight: 800; font-size: 14px;
+    letter-spacing: -0.02em; color: var(--text); text-transform: none;
+  }
+  .topbar-rule { width: 28px; height: 1px; background: var(--border); }
+
+  /* ============================================================
+     Shift-key dark-mode toggle (the easter egg)
+     ============================================================ */
+  .shift-key {
+    position: relative;
+    display: inline-flex; align-items: center; justify-content: center;
+    gap: 8px;
+    min-width: 96px; height: 44px;
+    padding: 0 14px 0 12px;
+    background: var(--key-face);
+    color: var(--text);
+    border: 1.5px solid var(--key-side);
+    border-bottom-width: 4px;
+    border-radius: 8px;
+    font-family: 'Space Grotesk';
+    font-weight: 500; font-size: 11px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    cursor: pointer;
+    user-select: none;
+    transition: transform 0.08s ease, border-bottom-width 0.08s ease,
+                background 0.4s ease, border-color 0.4s ease, color 0.4s ease;
+  }
+  .shift-key:hover { background: var(--bg-card-hover); }
+  .shift-key:active,
+  .shift-key.is-pressed {
+    transform: translateY(2px);
+    border-bottom-width: 1.5px;
+  }
+  .shift-key .arrow {
+    font-family: 'Space Grotesk';
+    font-weight: 700; font-size: 13px; line-height: 1;
+    transform: translateY(-1px);
+  }
+  /* tiny embossed indicator dot */
+  .shift-key::after {
+    content: ""; position: absolute; bottom: 3px; left: 50%;
+    width: 12px; height: 1.5px; background: var(--text);
+    transform: translateX(-50%); opacity: 0.25; border-radius: 1px;
+  }
+
+  /* ============================================================
+     Hero shell
+     ============================================================ */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    padding: 140px 60px 56px;
+    display: flex; flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* The ghost YD watermark — only "decorative" element allowed */
+  .ghost {
+    position: absolute;
+    left: -2vw; bottom: -10vw;
+    font-family: 'Syne'; font-weight: 800;
+    font-size: 44vw; line-height: 0.78;
+    letter-spacing: -0.06em;
+    color: transparent;
+    -webkit-text-stroke: 1.5px var(--border);
+    pointer-events: none;
+    z-index: 0;
+    user-select: none;
+    transition: -webkit-text-stroke-color 0.4s ease;
+    animation: ghost-in 1.6s ease 0.2s both;
+  }
+  @keyframes ghost-in {
+    from { opacity: 0; transform: translateY(40px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ============================================================
+     Grid: headline left, portrait right
+     ============================================================ */
+  .grid {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    column-gap: 64px;
+    align-items: start;
+    flex: 1;
+  }
+
+  /* Eyebrow */
+  .eyebrow {
+    display: flex; align-items: center; gap: 14px;
+    font-family: 'Space Grotesk';
+    font-weight: 400; font-size: 11px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--text-muted);
+    margin: 0 0 32px;
+    animation: fade-up 0.7s ease 0.15s both;
+  }
+  .eyebrow .index {
+    font-family: 'Syne'; font-weight: 800; font-size: 12px;
+    color: var(--text); letter-spacing: 0;
+  }
+  .eyebrow .dot {
+    width: 5px; height: 5px; border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 0 0 var(--accent);
+    animation: pulse 2.4s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(255, 92, 0, 0.45); }
+    50%      { box-shadow: 0 0 0 8px rgba(255, 92, 0, 0); }
+  }
+
+  /* The headline */
+  .headline {
+    font-family: 'Syne';
+    font-weight: 800;
+    font-size: clamp(56px, 9.4vw, 168px);
+    line-height: 0.94;
+    letter-spacing: -0.035em;
+    margin: 0;
+    color: var(--text);
+  }
+  .headline .row {
+    display: block;
+    overflow: hidden;
+  }
+  .headline .inner {
+    display: inline-block;
+    transform: translateY(110%);
+    animation: rise 0.95s cubic-bezier(0.2, 0.85, 0.2, 1) both;
+  }
+  .headline .row:nth-child(1) .inner { animation-delay: 0.30s; }
+  .headline .row:nth-child(2) .inner { animation-delay: 0.42s; }
+  .headline .row:nth-child(3) .inner { animation-delay: 0.54s; }
+  @keyframes rise { to { transform: translateY(0); } }
+
+  .headline .accent { color: var(--accent); }
+  /* Subtle slash through "pay for" — drawn with linear-gradient, not SVG */
+  .headline .strike {
+    position: relative;
+    display: inline-block;
+  }
+  .headline .strike::after {
+    content: "";
+    position: absolute;
+    left: -2%; right: -2%;
+    top: 56%;
+    height: 0.09em;
+    background: var(--accent);
+    transform-origin: left center;
+    transform: scaleX(0) rotate(-3deg);
+    animation: strike 0.6s cubic-bezier(0.65, 0, 0.35, 1) 1.15s forwards;
+  }
+  @keyframes strike { to { transform: scaleX(1) rotate(-3deg); } }
+
+  .cursor {
+    display: inline-block;
+    width: 0.085em; height: 0.78em;
+    background: var(--accent);
+    margin-left: 0.06em;
+    transform: translateY(0.02em);
+    animation: blink 1.05s steps(2) infinite;
+    opacity: 0;
+    animation-delay: 1.6s, 1.6s;
+  }
+  .cursor { animation: cursor-show 0.01s ease 1.6s forwards, blink 1.05s steps(2) infinite 1.6s; }
+  @keyframes cursor-show { to { opacity: 1; } }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  /* Lede */
+  .lede {
+    margin: 40px 0 0;
+    max-width: 540px;
+    font-family: 'Space Grotesk';
+    font-weight: 300;
+    font-size: 17px;
+    line-height: 1.7;
+    color: var(--text);
+    animation: fade-up 0.8s ease 1.0s both;
+  }
+  .lede strong {
+    font-weight: 500;
+    /* sentence emphasis without changing color */
+    border-bottom: 1.5px solid var(--accent);
+    padding-bottom: 1px;
+  }
+
+  /* Role list — bullet rail */
+  .roles {
+    margin: 28px 0 0;
+    display: flex; flex-wrap: wrap;
+    gap: 6px 20px;
+    font-family: 'Space Grotesk';
+    font-weight: 400; font-size: 12px;
+    letter-spacing: 0.10em; text-transform: uppercase;
+    color: var(--text-muted);
+    animation: fade-up 0.8s ease 1.15s both;
+  }
+  .roles span { position: relative; }
+  .roles span + span::before {
+    content: "";
+    position: absolute; left: -12px; top: 50%;
+    width: 3px; height: 3px; background: var(--accent);
+    transform: translateY(-50%); border-radius: 50%;
+  }
+
+  /* ============================================================
+     Right column — portrait
+     ============================================================ */
+  .right {
+    position: relative;
+    padding-top: 12px;
+    animation: portrait-in 1.0s cubic-bezier(0.34, 1.56, 0.64, 1) 0.65s both;
+  }
+  @keyframes portrait-in {
+    from { opacity: 0; transform: translateY(28px) scale(0.94) rotate(-1.5deg); }
+    to   { opacity: 1; transform: translateY(0) scale(1) rotate(-2deg); }
+  }
+  .portrait-stack {
+    position: relative;
+    width: 100%;
+    max-width: 360px;
+    margin-left: auto;
+  }
+  .portrait {
+    position: relative;
+    aspect-ratio: 4 / 5;
+    border-radius: 50% / 40%;
+    overflow: hidden;
+    background: var(--bg-card);
+    border: 2px solid var(--accent);
+    transform: rotate(0deg);
+    transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .portrait:hover { transform: scale(1.02) rotate(1deg); }
+  .portrait img {
+    width: 100%; height: 100%;
+    object-fit: cover; object-position: 50% 22%;
+    filter: saturate(0.92) contrast(1.02);
+  }
+  /* offset accent ghost behind portrait */
+  .portrait-stack::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translate(-14px, 14px) rotate(-2deg);
+    border: 1.5px solid var(--accent);
+    border-radius: 50% / 40%;
+    z-index: 0;
+    opacity: 0.7;
+  }
+  .portrait { position: relative; z-index: 1; }
+
+  /* Portrait meta — vertical label running up the side */
+  .portrait-meta {
+    position: absolute;
+    left: -40px; top: 12%;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    font-family: 'Space Grotesk';
+    font-weight: 400; font-size: 10px;
+    letter-spacing: 0.24em; text-transform: uppercase;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+  .portrait-meta::before {
+    content: ""; display: inline-block;
+    width: 1px; height: 24px;
+    background: var(--accent);
+    margin-right: 14px;
+    vertical-align: middle;
+  }
+
+  /* Available chip — bottom of right column */
+  .available {
+    margin-top: 24px;
+    margin-left: auto;
+    max-width: 360px;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px;
+    padding: 10px 14px;
+    border: 0.5px solid var(--border);
+    border-radius: 8px;
+    font-family: 'Space Grotesk';
+    font-weight: 400; font-size: 11px;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--text);
+    animation: fade-up 0.8s ease 1.2s both;
+  }
+  .available .live {
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .available .live::before {
+    content: ""; width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent);
+    animation: pulse 2.4s ease-in-out infinite;
+  }
+  .available .city {
+    color: var(--text-muted); font-weight: 400; letter-spacing: 0.18em;
+  }
+
+  /* ============================================================
+     KPI row — baseline-aligned big numerals
+     ============================================================ */
+  .kpis {
+    position: relative; z-index: 2;
+    margin-top: 96px;
+    padding-top: 28px;
+    border-top: 1px solid var(--border);
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0;
+  }
+  .kpi {
+    padding: 0 24px 0 0;
+    border-right: 1px solid var(--border);
+    display: flex; flex-direction: column; gap: 10px;
+    animation: fade-up 0.7s ease both;
+  }
+  .kpi:last-child { border-right: 0; }
+  .kpi:nth-child(1) { animation-delay: 1.1s; padding-left: 0; }
+  .kpi:nth-child(2) { animation-delay: 1.2s; padding-left: 24px; }
+  .kpi:nth-child(3) { animation-delay: 1.3s; padding-left: 24px; }
+  .kpi:nth-child(4) { animation-delay: 1.4s; padding-left: 24px; }
+  .kpi:nth-child(5) { animation-delay: 1.5s; padding-left: 24px; }
+
+  .kpi .value {
+    font-family: 'Syne'; font-weight: 800;
+    font-size: clamp(40px, 4.4vw, 68px);
+    letter-spacing: -0.04em; line-height: 0.95;
+    color: var(--text);
+    display: flex; align-items: baseline; gap: 2px;
+  }
+  .kpi .plus, .kpi .times {
+    color: var(--accent);
+    font-size: 0.55em;
+    transform: translateY(-0.05em);
+    margin-left: 2px;
+  }
+  .kpi .label {
+    font-family: 'Space Grotesk';
+    font-weight: 400; font-size: 10.5px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  /* ============================================================
+     Companies ticker — slow marquee
+     ============================================================ */
+  .ticker {
+    position: relative; z-index: 2;
+    margin-top: 56px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 28px;
+    align-items: center;
+    animation: fade-up 0.8s ease 1.7s both;
+  }
+  .ticker-label {
+    font-family: 'Space Grotesk';
+    font-weight: 500; font-size: 11px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--text);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .ticker-label::after {
+    content: ""; width: 24px; height: 1px; background: var(--text);
+  }
+  .ticker-track {
+    position: relative;
+    overflow: hidden;
+    mask-image: linear-gradient(90deg, transparent 0, #000 6%, #000 94%, transparent 100%);
+  }
+  .ticker-row {
+    display: inline-flex; align-items: center; gap: 44px;
+    white-space: nowrap;
+    animation: marquee 38s linear infinite;
+    padding-right: 44px;
+  }
+  .ticker:hover .ticker-row { animation-play-state: paused; }
+  .ticker-row span {
+    font-family: 'Syne'; font-weight: 700;
+    font-size: 22px; letter-spacing: -0.01em;
+    color: var(--text);
+    display: inline-flex; align-items: center; gap: 44px;
+  }
+  .ticker-row span::after {
+    content: "";
+    width: 8px; height: 8px;
+    background: var(--accent);
+    transform: rotate(45deg);
+    flex-shrink: 0;
+  }
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ============================================================
+     Responsive
+     ============================================================ */
+  @media (max-width: 900px) {
+    .topbar { padding: 20px 24px; }
+    .hero { padding: 110px 24px 36px; }
+    .grid { grid-template-columns: 1fr; row-gap: 48px; }
+    .right { order: -1; }
+    .portrait-stack { max-width: 260px; margin: 0 auto 0 0; }
+    .portrait-meta { left: -28px; }
+    .available { margin-left: 0; max-width: 100%; }
+    .kpis {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px 0;
+      margin-top: 64px;
+    }
+    .kpi { border-right: 0 !important; padding: 0 0 0 16px !important; border-left: 1px solid var(--border); }
+    .kpi:nth-child(odd) { padding-left: 0 !important; border-left: 0; }
+    .ticker { grid-template-columns: 1fr; gap: 16px; }
+    .ghost { font-size: 78vw; bottom: -14vw; }
+  }
+
+  /* Respect reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.001s !important;
+      animation-delay: 0s !important;
+      transition-duration: 0.001s !important;
+    }
+    .headline .inner { transform: none !important; }
+  }
+  /* ============================================================
+     Shared section chrome
+     ============================================================ */
+  .section {
+    position: relative; z-index: 2;
+    padding: 120px 60px;
+    border-top: 1px solid var(--border);
+  }
+  .section--flush { padding-top: 80px; }
+  .section-head {
+    display: grid;
+    grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+    column-gap: 64px;
+    align-items: end;
+    margin-bottom: 64px;
+  }
+  .section-head .meta {
+    display: flex; flex-direction: column; gap: 12px;
+  }
+  .section-head .index {
+    font-family: 'Syne'; font-weight: 800;
+    font-size: 14px; letter-spacing: 0;
+    color: var(--accent);
+  }
+  .section-head .label {
+    font-family: 'Space Grotesk';
+    font-weight: 400; font-size: 11px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--text-muted);
+    display: flex; align-items: center; gap: 12px;
+  }
+  .section-head .label::before {
+    content: ""; width: 28px; height: 1px; background: var(--text-muted);
+  }
+  .section-head .title {
+    font-family: 'Syne'; font-weight: 800;
+    font-size: clamp(36px, 4.6vw, 64px);
+    letter-spacing: -0.03em; line-height: 1.0;
+    margin: 0; color: var(--text);
+  }
+  .section-head .title em {
+    font-style: normal; color: var(--accent);
+  }
+
+  /* ============================================================
+     02 · What I do — service grid
+     ============================================================ */
+  .services {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    background: var(--border);
+    gap: 1px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .service {
+    position: relative;
+    padding: 48px 40px 60px;
+    background: var(--bg);
+    transition: background 0.3s ease;
+    cursor: default;
+  }
+  .service:hover { background: var(--bg-card-hover); }
+  .service::after {
+    content: "";
+    position: absolute; left: 0; bottom: 0;
+    height: 2px; width: 0;
+    background: var(--accent);
+    transition: width 0.35s ease;
+  }
+  .service:hover::after { width: 100%; }
+  .service .num {
+    font-family: 'Space Grotesk';
+    font-weight: 700; font-size: 11px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 28px;
+  }
+  .service h3 {
+    font-family: 'Syne'; font-weight: 700;
+    font-size: 32px; letter-spacing: -0.02em; line-height: 1.1;
+    margin: 0 0 16px;
+    color: var(--text);
+  }
+  .service p {
+    font-family: 'Space Grotesk'; font-weight: 300;
+    font-size: 15px; line-height: 1.75;
+    color: var(--text-muted);
+    margin: 0 0 28px; max-width: 42ch;
+  }
+  .service ul {
+    list-style: none; padding: 0; margin: 0;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .service li {
+    position: relative; padding-left: 26px;
+    font-family: 'Space Grotesk'; font-weight: 400;
+    font-size: 13px; line-height: 1.5; color: var(--text);
+  }
+  .service li::before {
+    content: ""; position: absolute;
+    left: 0; top: 0.7em;
+    width: 16px; height: 1px; background: var(--accent);
+  }
+  .service .arrow {
+    position: absolute; top: 40px; right: 40px;
+    font-family: 'Space Grotesk'; font-weight: 400;
+    font-size: 22px; line-height: 1;
+    color: var(--text-hint);
+    transition: color 0.2s ease, transform 0.2s ease;
+  }
+  .service:hover .arrow { color: var(--accent); transform: translate(3px, -3px); }
+
+  /* ============================================================
+     03 · Selected work — editorial project layout
+     ============================================================ */
+  .work {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 32px; row-gap: 64px;
+  }
+  .project {
+    background: var(--bg-card);
+    border: 0.5px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    display: flex; flex-direction: column;
+    transition: transform 0.25s ease, border-color 0.25s ease;
+    cursor: pointer;
+  }
+  .project:hover { transform: translateY(-4px); border-color: var(--accent); }
+  .project--wide { grid-column: 1 / -1; }
+  .project--wide { display: grid; grid-template-columns: 1.2fr 1fr; gap: 0; }
+  .project--wide .thumb { border-right: 0.5px solid var(--border); border-bottom: 0; }
+  .thumb {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    background:
+      repeating-linear-gradient(
+        135deg,
+        var(--bg-card) 0,
+        var(--bg-card) 11px,
+        var(--bg-card-hover) 11px,
+        var(--bg-card-hover) 12px
+      );
+    border-bottom: 0.5px solid var(--border);
+    overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .project--wide .thumb { aspect-ratio: auto; min-height: 100%; }
+  .thumb-label {
+    font-family: 'Space Grotesk'; font-weight: 500;
+    font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--text-hint);
+    background: var(--bg);
+    padding: 6px 12px; border-radius: 3px;
+    border: 0.5px solid var(--border);
+  }
+  .project-body {
+    padding: 28px 28px 32px;
+    display: flex; flex-direction: column; gap: 14px;
+  }
+  .project--wide .project-body { padding: 48px 40px; justify-content: center; }
+  .project-meta {
+    display: flex; align-items: center; gap: 16px;
+    font-family: 'Space Grotesk'; font-weight: 500; font-size: 11px;
+    letter-spacing: 0.12em; text-transform: uppercase;
+  }
+  .status { display: inline-flex; align-items: center; gap: 8px; }
+  .status--live { color: var(--accent); }
+  .status--progress, .status--case { color: var(--text-muted); }
+  .status--live::before {
+    content: ""; width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent);
+  }
+  .project h3 {
+    font-family: 'Syne'; font-weight: 700;
+    font-size: 26px; letter-spacing: -0.01em; line-height: 1.15;
+    margin: 0; color: var(--text);
+  }
+  .project--wide h3 { font-size: 38px; letter-spacing: -0.02em; }
+  .project p {
+    margin: 0;
+    font-family: 'Space Grotesk'; font-weight: 300;
+    font-size: 14px; line-height: 1.6; color: var(--text-muted);
+  }
+  .project--wide p { font-size: 16px; line-height: 1.7; max-width: 46ch; }
+  .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+  .tag {
+    font-family: 'Space Grotesk'; font-weight: 400;
+    font-size: 12px; letter-spacing: 0.02em;
+    color: var(--text);
+    background: var(--bg);
+    padding: 5px 12px;
+    border-radius: 3px;
+    border: 0.5px solid var(--border);
+  }
+  .project-arrow {
+    margin-top: 8px;
+    font-family: 'Space Grotesk'; font-weight: 500;
+    font-size: 13px; letter-spacing: 0.05em;
+    color: var(--text-muted);
+    display: inline-flex; align-items: center; gap: 8px;
+    transition: color 0.2s ease, gap 0.2s ease;
+  }
+  .project:hover .project-arrow { color: var(--accent); gap: 14px; }
+
+  /* ============================================================
+     04 · Taught & learned — polaroids
+     ============================================================ */
+  .taught {
+    display: grid;
+    grid-template-columns: minmax(0, 6fr) minmax(0, 6fr);
+    column-gap: 64px;
+    align-items: center;
+  }
+  .taught-quote {
+    font-family: 'Syne'; font-weight: 700;
+    font-size: clamp(28px, 3.2vw, 44px);
+    line-height: 1.15; letter-spacing: -0.02em;
+    color: var(--text);
+    margin: 0 0 24px;
+  }
+  .taught-quote em { font-style: normal; color: var(--accent); }
+  .taught-lede {
+    font-family: 'Space Grotesk'; font-weight: 300;
+    font-size: 16px; line-height: 1.75;
+    color: var(--text-muted);
+    max-width: 46ch;
+    margin: 0 0 32px;
+  }
+  .taught-stats {
+    display: flex; gap: 40px;
+  }
+  .taught-stats .kpi { padding: 0; border: 0; }
+  .taught-stats .kpi .value { font-size: 48px; }
+
+  .polaroids {
+    position: relative;
+    min-height: 420px;
+  }
+  .polaroid {
+    position: absolute;
+    width: 240px;
+    background: #FFFFFF;
+    padding: 12px 12px 28px;
+    border-radius: 2px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.10), 0 8px 24px rgba(0,0,0,0.06);
+    transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  :root[data-theme="dark"] .polaroid { background: #F2F0EB; }
+  .polaroid:hover { transform: rotate(0deg) translateY(-6px) scale(1.03) !important; z-index: 5; }
+  .polaroid .photo {
+    aspect-ratio: 1 / 1;
+    background:
+      repeating-linear-gradient(
+        135deg,
+        #ECEAE4 0,
+        #ECEAE4 9px,
+        #E0DDD5 9px,
+        #E0DDD5 10px
+      );
+    overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .polaroid .photo img { width: 100%; height: 100%; object-fit: cover; }
+  .polaroid .photo-label {
+    font-family: 'Space Grotesk'; font-weight: 400;
+    font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: #8A8580;
+  }
+  .polaroid .cap {
+    margin: 14px 4px 0;
+    font-family: 'Caveat'; font-weight: 400;
+    font-size: 17px; line-height: 1.2;
+    color: #2A2A2A;
+  }
+  .polaroid .cap-date {
+    display: block; margin-top: 4px;
+    font-family: 'Caveat'; font-size: 14px; color: #8A8580;
+  }
+  .polaroid--a { top: 0; left: 40px; transform: rotate(-4deg); z-index: 2; }
+  .polaroid--b { top: 80px; right: 20px; transform: rotate(3deg); z-index: 3; }
+  .polaroid--c { top: 220px; left: 130px; transform: rotate(-1.5deg); z-index: 1; }
+
+  /* ============================================================
+     05 · Education — timeline list
+     ============================================================ */
+  .edu {
+    display: flex; flex-direction: column;
+    border-top: 1px solid var(--border);
+  }
+  .edu-row {
+    display: grid;
+    grid-template-columns: 220px 1fr auto;
+    align-items: center;
+    column-gap: 40px;
+    padding: 28px 0;
+    border-bottom: 1px solid var(--border);
+    transition: padding 0.25s ease;
+  }
+  .edu-row:hover { padding-left: 12px; }
+  .edu-year {
+    font-family: 'Syne'; font-weight: 800;
+    font-size: 44px; letter-spacing: -0.03em; line-height: 1;
+    color: var(--text);
+  }
+  .edu-year .end { color: var(--text-hint); }
+  .edu-detail h4 {
+    font-family: 'Space Grotesk'; font-weight: 500;
+    font-size: 17px; line-height: 1.3; margin: 0 0 6px;
+    color: var(--text);
+  }
+  .edu-detail p {
+    margin: 0;
+    font-family: 'Space Grotesk'; font-weight: 300;
+    font-size: 13px; color: var(--text-muted);
+  }
+  .edu-place {
+    font-family: 'Space Grotesk'; font-weight: 500;
+    font-size: 11px; letter-spacing: 0.10em; text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  /* ============================================================
+     06 · FAQ accordion
+     ============================================================ */
+  .faq {
+    border-top: 1px solid var(--border);
+  }
+  .faq details {
+    border-bottom: 1px solid var(--border);
+    padding: 0;
+  }
+  .faq summary {
+    list-style: none;
+    display: grid;
+    grid-template-columns: 60px 1fr 40px;
+    align-items: center;
+    padding: 28px 0;
+    cursor: pointer;
+    font-family: 'Space Grotesk'; font-weight: 500;
+    font-size: 18px;
+    color: var(--text);
+    transition: color 0.2s ease;
+  }
+  .faq summary::-webkit-details-marker { display: none; }
+  .faq summary:hover { color: var(--accent); }
+  .faq .q-num {
+    font-family: 'Space Grotesk'; font-weight: 400;
+    font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .faq .q-toggle {
+    width: 28px; height: 28px;
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--accent);
+    font-family: 'Space Grotesk'; font-weight: 400; font-size: 16px; line-height: 1;
+    transition: transform 0.25s ease, border-color 0.25s ease;
+    justify-self: end;
+  }
+  .faq details[open] .q-toggle { transform: rotate(45deg); border-color: var(--accent); }
+  .faq summary:hover .q-toggle { border-color: var(--accent); }
+  .faq .answer {
+    padding: 0 40px 32px 60px;
+    font-family: 'Space Grotesk'; font-weight: 300;
+    font-size: 15px; line-height: 1.8;
+    color: var(--text-muted);
+    max-width: 64ch;
+  }
+
+  /* ============================================================
+     07 · Contact — form + chat preview
+     ============================================================ */
+  .contact {
+    display: grid;
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    column-gap: 80px;
+    align-items: start;
+  }
+  .form {
+    display: flex; flex-direction: column;
+    gap: 32px;
+  }
+  .field {
+    display: flex; flex-direction: column;
+    gap: 6px;
+  }
+  .field label {
+    font-family: 'Space Grotesk'; font-weight: 400;
+    font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .field input, .field textarea {
+    border: 0;
+    border-bottom: 1px solid var(--border);
+    background: transparent;
+    padding: 10px 0;
+    font-family: 'Space Grotesk'; font-weight: 400;
+    font-size: 17px; color: var(--text);
+    width: 100%; resize: none;
+    transition: border-color 0.2s ease;
+  }
+  .field input::placeholder, .field textarea::placeholder { color: var(--text-hint); }
+  .field input:focus, .field textarea:focus {
+    outline: 0; border-bottom-color: var(--accent);
+  }
+  .form-foot {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-top: 16px;
+  }
+  .btn-primary {
+    background: var(--accent); color: #FFF;
+    border: 0; padding: 14px 28px;
+    border-radius: 8px;
+    font-family: 'Space Grotesk'; font-weight: 500;
+    font-size: 14px; letter-spacing: 0.04em;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.2s ease;
+  }
+  .btn-primary:hover { background: var(--accent-hover); }
+  .btn-primary:active { transform: translateY(1px); }
+  .form-hint {
+    font-family: 'Space Grotesk'; font-weight: 300;
+    font-size: 13px; color: var(--text-muted);
+  }
+
+  .chat {
+    border: 0.5px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    display: flex; flex-direction: column; gap: 14px;
+    background: var(--bg-card);
+  }
+  .chat-head {
+    display: flex; align-items: center; gap: 10px;
+    padding-bottom: 12px;
+    border-bottom: 0.5px solid var(--border);
+    font-family: 'Space Grotesk'; font-weight: 500; font-size: 12px;
+    letter-spacing: 0.10em; text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .chat-head::before {
+    content: ""; width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent);
+    animation: pulse 2.4s ease-in-out infinite;
+  }
+  .bubble {
+    max-width: 78%;
+    padding: 10px 16px;
+    font-family: 'Space Grotesk'; font-weight: 400;
+    font-size: 14px; line-height: 1.5;
+  }
+  .bubble.user {
+    align-self: flex-end;
+    background: var(--accent); color: #FFF;
+    border-radius: 12px 12px 2px 12px;
+  }
+  .bubble.bot {
+    align-self: flex-start;
+    background: var(--bg);
+    color: var(--text);
+    border-radius: 12px 12px 12px 2px;
+    border: 0.5px solid var(--border);
+  }
+
+  /* ============================================================
+     Footer
+     ============================================================ */
+  .footer {
+    position: relative; z-index: 2;
+    padding: 80px 60px 32px;
+    border-top: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .footer-top {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: end;
+    gap: 40px;
+    margin-bottom: 64px;
+  }
+  .footer-statement {
+    font-family: 'Syne'; font-weight: 800;
+    font-size: clamp(40px, 6vw, 88px);
+    letter-spacing: -0.035em; line-height: 0.95;
+    margin: 0;
+  }
+  .footer-statement em { font-style: normal; color: var(--accent); }
+  .footer-links {
+    display: flex; flex-direction: column; gap: 6px;
+    text-align: right;
+  }
+  .footer-links a {
+    font-family: 'Syne'; font-weight: 700;
+    font-size: 22px; letter-spacing: -0.01em;
+    color: var(--text); text-decoration: none;
+    display: inline-flex; align-items: center; justify-content: flex-end; gap: 10px;
+    transition: color 0.2s ease, gap 0.2s ease;
+  }
+  .footer-links a::after {
+    content: "↗";
+    color: var(--text-muted);
+    transition: color 0.2s ease, transform 0.2s ease;
+  }
+  .footer-links a:hover { color: var(--accent); gap: 16px; }
+  .footer-links a:hover::after { color: var(--accent); transform: translate(2px, -2px); }
+  .footer-mark {
+    font-family: 'Syne'; font-weight: 800;
+    font-size: clamp(160px, 30vw, 380px);
+    letter-spacing: -0.06em; line-height: 0.8;
+    color: transparent;
+    -webkit-text-stroke: 1.5px var(--border);
+    margin: 0 0 -0.18em;
+    user-select: none;
+  }
+  .footer-meta {
+    display: flex; justify-content: space-between;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    font-family: 'Space Grotesk'; font-weight: 400;
+    font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  /* Responsive for new sections */
+  @media (max-width: 900px) {
+    .section { padding: 80px 24px; }
+    .section-head { grid-template-columns: 1fr; row-gap: 16px; margin-bottom: 40px; }
+    .services { grid-template-columns: 1fr; }
+    .service { padding: 32px 24px 40px; }
+    .work { grid-template-columns: 1fr; row-gap: 32px; }
+    .project--wide { grid-template-columns: 1fr; }
+    .taught { grid-template-columns: 1fr; row-gap: 40px; }
+    .polaroids { min-height: 480px; }
+    .polaroid { width: 200px; }
+    .polaroid--a { left: 0; }
+    .polaroid--b { right: 0; top: 60px; }
+    .polaroid--c { left: 60px; top: 240px; }
+    .edu-row { grid-template-columns: 80px 1fr; row-gap: 4px; }
+    .edu-year { font-size: 28px; }
+    .edu-place { grid-column: 1 / -1; }
+    .contact { grid-template-columns: 1fr; row-gap: 56px; }
+    .footer { padding: 56px 24px 24px; }
+    .footer-top { grid-template-columns: 1fr; }
+    .footer-links { text-align: left; }
+    .footer-links a { justify-content: flex-start; }
+    .faq summary { grid-template-columns: 40px 1fr 32px; font-size: 16px; }
+    .faq .answer { padding: 0 0 24px 40px; }
+  }
+
+</style>
+</head>
+<body>
+
+  <!-- ============================================================
+       Top bar
+       ============================================================ -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <span class="topbar-mark">YD</span>
+      <span class="topbar-rule"></span>
+      <span>01 / Portfolio &nbsp;·&nbsp; Sfax → Anywhere</span>
+    </div>
+    <button class="shift-key" id="themeToggle" type="button" aria-label="Toggle dark mode" title="Press ⇧ — toggles the lights">
+      <span class="arrow">⇧</span>
+      <span>Shift</span>
+    </button>
+  </header>
+
+  <main>
+  <!-- ============================================================
+       01 · Hero
+       ============================================================ -->
+  <section class="hero" data-screen-label="01 Hero">
+    <div class="ghost" aria-hidden="true">YD</div>
+
+    <div class="grid">
+      <div class="left">
+        <div class="eyebrow">
+          <span class="index">№ 23</span>
+          <span>Yassine Dhouib · b. 2003 · Sfax, TN</span>
+          <span class="dot" aria-hidden="true"></span>
+        </div>
+
+        <h1 class="headline" aria-label="I build the tools I refuse to pay for.">
+          <span class="row"><span class="inner">I build the</span></span>
+          <span class="row"><span class="inner"><span class="accent">tools</span> I refuse</span></span>
+          <span class="row"><span class="inner">to <span class="strike">pay for</span>.<span class="cursor" aria-hidden="true"></span></span></span>
+        </h1>
+
+        <p class="lede">
+          Full-stack dev who designs, edits video, solders IoT, and teaches when the room asks. I ship things instead of subscribing to them — <strong>five years of refusing invoices</strong>, one repo at a time.
+        </p>
+
+        <div class="roles" aria-label="What I do">
+          <span>Full-stack</span>
+          <span>Design</span>
+          <span>Video</span>
+          <span>IoT</span>
+          <span>Teaching</span>
+        </div>
+      </div>
+
+      <aside class="right">
+        <div class="portrait-stack">
+          <span class="portrait-meta">Sfax, Tunisia — Self-portrait, 2024</span>
+          <div class="portrait">
+            <img src="assets/hero.webp" alt="Yassine Dhouib" />
+          </div>
+        </div>
+        <div class="available">
+          <span class="live">Open · June 26</span>
+          <span class="city">Sfax / Remote</span>
+        </div>
+      </aside>
+    </div>
+
+    <!-- KPI row -->
+    <section class="kpis" aria-label="By the numbers">
+      <div class="kpi">
+        <div class="value"><span data-count="5">0</span><span class="plus">+</span></div>
+        <div class="label">Years building</div>
+      </div>
+      <div class="kpi">
+        <div class="value"><span data-count="48">0</span><span class="plus">+</span></div>
+        <div class="label">Public repos</div>
+      </div>
+      <div class="kpi">
+        <div class="value"><span data-count="100">0</span><span class="plus">+</span></div>
+        <div class="label">Students taught</div>
+      </div>
+      <div class="kpi">
+        <div class="value"><span data-count="20">0</span><span class="plus">+</span></div>
+        <div class="label">PFE projects</div>
+      </div>
+      <div class="kpi">
+        <div class="value"><span data-count="1">0</span><span class="times">×</span></div>
+        <div class="label">Hackathon win</div>
+      </div>
+    </section>
+
+    <!-- Companies marquee -->
+    <section class="ticker" aria-label="Selected collaborations">
+      <div class="ticker-label">Trusted by</div>
+      <div class="ticker-track">
+        <div class="ticker-row" id="tickerRow">
+          <span>Dalmar</span>
+          <span>ENET'Com</span>
+          <span>RS</span>
+          <span>Devura</span>
+          <span>MallouliNova</span>
+          <span>Innotwist</span>
+          <!-- duplicated for seamless loop, injected by JS -->
+        </div>
+      </div>
+    </section>
+  </section>
+
+  <!-- ============================================================
+       02 · What I do
+       ============================================================ -->
+  <section class="section" data-screen-label="02 What I do">
+    <div class="section-head">
+      <div class="meta">
+        <span class="index">№ 02</span>
+        <span class="label">What I do</span>
+      </div>
+      <h2 class="title">Five jobs, <em>one bench.</em></h2>
+    </div>
+
+    <div class="services">
+      <article class="service">
+        <span class="arrow">↗</span>
+        <div class="num">01 · Build</div>
+        <h3>Full-stack web apps</h3>
+        <p>From the database up. Apps that don't fall over on Monday morning, and won't surprise you with a bill at the end of the month.</p>
+        <ul>
+          <li>Next.js · React · Node · Postgres</li>
+          <li>Auth, payments, admin tools</li>
+          <li>Self-hosted by default</li>
+        </ul>
+      </article>
+      <article class="service">
+        <span class="arrow">↗</span>
+        <div class="num">02 · Design</div>
+        <h3>Brand &amp; product UI</h3>
+        <p>Marks, systems, and screens that survive a resize. Built in Figma, written in CSS that another human can read.</p>
+        <ul>
+          <li>Identity &amp; mark design</li>
+          <li>Design systems &amp; tokens</li>
+          <li>Web and mobile UI</li>
+        </ul>
+      </article>
+      <article class="service">
+        <span class="arrow">↗</span>
+        <div class="num">03 · Edit</div>
+        <h3>Video, cut tight</h3>
+        <p>Short-form that holds attention. Long-form that earns it. DaVinci and Premiere — colored, paced, finished.</p>
+        <ul>
+          <li>Brand films · YouTube · Reels</li>
+          <li>Color grading &amp; sound</li>
+          <li>Motion graphics in After Effects</li>
+        </ul>
+      </article>
+      <article class="service">
+        <span class="arrow">↗</span>
+        <div class="num">04 · Solder</div>
+        <h3>IoT that reports for duty</h3>
+        <p>ESP32 and friends. Sensors, telemetry, dashboards. Hardware that talks back instead of blinking and giving up.</p>
+        <ul>
+          <li>Embedded firmware</li>
+          <li>MQTT · WebSocket pipelines</li>
+          <li>Realtime dashboards</li>
+        </ul>
+      </article>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       03 · Selected work
+       ============================================================ -->
+  <section class="section" data-screen-label="03 Selected work">
+    <div class="section-head">
+      <div class="meta">
+        <span class="index">№ 03</span>
+        <span class="label">Selected work</span>
+      </div>
+      <h2 class="title">Things I shipped<br>instead of <em>subscribing to.</em></h2>
+    </div>
+
+    <div class="work">
+      <article class="project project--wide">
+        <div class="thumb">
+          <span class="thumb-label">Screenshot · 2400×1500</span>
+        </div>
+        <div class="project-body">
+          <div class="project-meta">
+            <span class="status status--live">Live</span>
+            <span style="color:var(--text-muted);">Devura · 2025</span>
+          </div>
+          <h3>Devura — the agency stack we wrote ourselves.</h3>
+          <p>Internal CRM, invoicing, time-tracking, and a client portal. Replaced five SaaS subscriptions for a small studio that wanted to stop renting their tools.</p>
+          <div class="tags">
+            <span class="tag">Next.js</span>
+            <span class="tag">Postgres</span>
+            <span class="tag">Stripe</span>
+            <span class="tag">Figma</span>
+          </div>
+          <span class="project-arrow">Read the case study →</span>
+        </div>
+      </article>
+
+      <article class="project">
+        <div class="thumb"><span class="thumb-label">POS · 1600×900</span></div>
+        <div class="project-body">
+          <div class="project-meta">
+            <span class="status status--live">Live</span>
+            <span style="color:var(--text-muted);">MallouliNova · 2024</span>
+          </div>
+          <h3>A POS for a bakery that hated POS software.</h3>
+          <p>Offline-first, Arabic UI, runs on a €120 tablet. The owner trained two cousins in an afternoon.</p>
+          <div class="tags">
+            <span class="tag">React</span>
+            <span class="tag">SQLite</span>
+            <span class="tag">Arabic UI</span>
+          </div>
+          <span class="project-arrow">See it live →</span>
+        </div>
+      </article>
+
+      <article class="project">
+        <div class="thumb"><span class="thumb-label">Dashboard · 1600×900</span></div>
+        <div class="project-body">
+          <div class="project-meta">
+            <span class="status status--progress">In progress</span>
+            <span style="color:var(--text-muted);">Innotwist · 2026</span>
+          </div>
+          <h3>IoT fleet dashboard for greenhouse sensors.</h3>
+          <p>Forty ESP32 nodes reporting humidity, soil, and CO₂ over MQTT. Maps and alerts in real time.</p>
+          <div class="tags">
+            <span class="tag">ESP32</span>
+            <span class="tag">MQTT</span>
+            <span class="tag">D3</span>
+          </div>
+          <span class="project-arrow">Case study soon →</span>
+        </div>
+      </article>
+
+      <article class="project">
+        <div class="thumb"><span class="thumb-label">Brand film · 1920×1080</span></div>
+        <div class="project-body">
+          <div class="project-meta">
+            <span class="status status--case">Case study</span>
+            <span style="color:var(--text-muted);">Dalmar · 2024</span>
+          </div>
+          <h3>Brand film &amp; site for a Sfax restaurant.</h3>
+          <p>Two-week sprint: photoshoot, edit, type system, one-page site. Bookings up 38% in the first month.</p>
+          <div class="tags">
+            <span class="tag">DaVinci</span>
+            <span class="tag">Webflow</span>
+            <span class="tag">Photography</span>
+          </div>
+          <span class="project-arrow">Read the case study →</span>
+        </div>
+      </article>
+
+      <article class="project">
+        <div class="thumb"><span class="thumb-label">Portal · 1600×900</span></div>
+        <div class="project-body">
+          <div class="project-meta">
+            <span class="status status--live">Live</span>
+            <span style="color:var(--text-muted);">ENET'Com · 2023</span>
+          </div>
+          <h3>Student club portal for ENET'Com.</h3>
+          <p>Event listings, member directory, internal blog. Used by ~600 students in the first semester.</p>
+          <div class="tags">
+            <span class="tag">Next.js</span>
+            <span class="tag">Supabase</span>
+          </div>
+          <span class="project-arrow">See it live →</span>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       04 · Taught & learned
+       ============================================================ -->
+  <section class="section" data-screen-label="04 Teaching">
+    <div class="section-head">
+      <div class="meta">
+        <span class="index">№ 04</span>
+        <span class="label">Taught and learned</span>
+      </div>
+      <h2 class="title">If I can't explain it,<br>I don't <em>understand it.</em></h2>
+    </div>
+
+    <div class="taught">
+      <div class="taught-left">
+        <p class="taught-quote">A hundred students later, I'm still the one taking notes.</p>
+        <p class="taught-lede">I teach full-stack and product design at ENET'Com and to private cohorts in Sfax. Workshops on weekends, longer cohorts when the room asks. Every class costs me a notebook of new questions.</p>
+        <div class="taught-stats">
+          <div class="kpi">
+            <div class="value">100<span class="plus">+</span></div>
+            <div class="label">Students</div>
+          </div>
+          <div class="kpi">
+            <div class="value">20<span class="plus">+</span></div>
+            <div class="label">PFE projects</div>
+          </div>
+          <div class="kpi">
+            <div class="value">04<span class="plus">+</span></div>
+            <div class="label">Courses written</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="polaroids">
+        <div class="polaroid polaroid--a">
+          <div class="photo">
+            <img src="assets/teacher.webp" alt="Yassine teaching marketing fundamentals" />
+          </div>
+          <div class="cap">
+            Teaching marketing fundamentals
+            <span class="cap-date">May 2024 — ENET'Com</span>
+          </div>
+        </div>
+        <div class="polaroid polaroid--b">
+          <div class="photo">
+            <span class="photo-label">Workshop · drop in</span>
+          </div>
+          <div class="cap">
+            React from scratch — weekend cohort
+            <span class="cap-date">Nov 2024 — Sfax</span>
+          </div>
+        </div>
+        <div class="polaroid polaroid--c">
+          <div class="photo">
+            <span class="photo-label">Group photo · drop in</span>
+          </div>
+          <div class="cap">
+            PFE defense day, the whole class made it
+            <span class="cap-date">June 2025</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       05 · Education
+       ============================================================ -->
+  <section class="section" data-screen-label="05 Education">
+    <div class="section-head">
+      <div class="meta">
+        <span class="index">№ 05</span>
+        <span class="label">Education</span>
+      </div>
+      <h2 class="title">School, mostly self-<em>directed.</em></h2>
+    </div>
+
+    <div class="edu">
+      <div class="edu-row">
+        <div class="edu-year">2022<span class="end">/25</span></div>
+        <div class="edu-detail">
+          <h4>Engineering degree, Computer Science</h4>
+          <p>Software engineering, distributed systems, embedded — final-year specialization in IoT.</p>
+        </div>
+        <span class="edu-place">ENET'Com · Sfax</span>
+      </div>
+      <div class="edu-row">
+        <div class="edu-year">2020<span class="end">/22</span></div>
+        <div class="edu-detail">
+          <h4>Preparatory cycle — Maths &amp; Physics</h4>
+          <p>Two years of foundational math, physics, and the discipline of sitting still.</p>
+        </div>
+        <span class="edu-place">IPEIS · Sfax</span>
+      </div>
+      <div class="edu-row">
+        <div class="edu-year">2019<span class="end">/20</span></div>
+        <div class="edu-detail">
+          <h4>Tunisian Baccalaureate — Mathematics</h4>
+          <p>Mention <em>Très Bien</em>. Started shipping side-projects the same year.</p>
+        </div>
+        <span class="edu-place">Lycée · Sfax</span>
+      </div>
+      <div class="edu-row">
+        <div class="edu-year">∞</div>
+        <div class="edu-detail">
+          <h4>Self-taught — design, motion, hardware</h4>
+          <p>Figma, DaVinci, ESP32, the open web. Most of what I do for money started as a 2 a.m. tab.</p>
+        </div>
+        <span class="edu-place">Ongoing</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       06 · FAQ
+       ============================================================ -->
+  <section class="section" data-screen-label="06 FAQ">
+    <div class="section-head">
+      <div class="meta">
+        <span class="index">№ 06</span>
+        <span class="label">Frequent questions</span>
+      </div>
+      <h2 class="title">The five things <em>everyone asks.</em></h2>
+    </div>
+
+    <div class="faq">
+      <details>
+        <summary>
+          <span class="q-num">Q.01</span>
+          <span>What's your rate?</span>
+          <span class="q-toggle">+</span>
+        </summary>
+        <div class="answer">It depends — I scope by project, not by hour. Send me a one-paragraph brief and I'll send a number within two days. Smallest projects start around $2.4k; the average is closer to $6–10k.</div>
+      </details>
+      <details>
+        <summary>
+          <span class="q-num">Q.02</span>
+          <span>Do you work remote?</span>
+          <span class="q-toggle">+</span>
+        </summary>
+        <div class="answer">Yes. I'm based in Sfax, GMT+1, and I overlap comfortably with EU and Maghreb hours. For US clients we'll find a window. I'll travel for kickoff weeks when it matters.</div>
+      </details>
+      <details>
+        <summary>
+          <span class="q-num">Q.03</span>
+          <span>Why "I refuse to pay for"?</span>
+          <span class="q-toggle">+</span>
+        </summary>
+        <div class="answer">Because most SaaS is rented furniture. If a tool's logic fits in a single Postgres table and three forms, I'd rather build it once and own it than pay $29 a month forever. It's also how I learn.</div>
+      </details>
+      <details>
+        <summary>
+          <span class="q-num">Q.04</span>
+          <span>Can you teach my team?</span>
+          <span class="q-toggle">+</span>
+        </summary>
+        <div class="answer">Probably. I've taught 100+ students full-stack and design fundamentals — both one-off workshops and month-long cohorts. Send me what you want them to walk away knowing and I'll send a syllabus.</div>
+      </details>
+      <details>
+        <summary>
+          <span class="q-num">Q.05</span>
+          <span>What's your turnaround?</span>
+          <span class="q-toggle">+</span>
+        </summary>
+        <div class="answer">Two to four weeks for most things; longer for engineering-heavy or hardware projects. I'll tell you the honest number the day we talk, not after a deposit.</div>
+      </details>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       07 · Contact
+       ============================================================ -->
+  <section class="section" data-screen-label="07 Contact">
+    <div class="section-head">
+      <div class="meta">
+        <span class="index">№ 07</span>
+        <span class="label">Get in touch</span>
+      </div>
+      <h2 class="title">Tell me what you're <em>building.</em></h2>
+    </div>
+
+    <div class="contact">
+      <form class="form" id="contactForm" onsubmit="event.preventDefault(); document.getElementById('contactHint').textContent='Sent. I\u2019ll reply within two working days.';">
+        <div class="field">
+          <label for="f-name">Your name</label>
+          <input id="f-name" type="text" placeholder="Sami, Ines, anonymous — your call" required />
+        </div>
+        <div class="field">
+          <label for="f-email">Email</label>
+          <input id="f-email" type="email" placeholder="you@somewhere.tn" required />
+        </div>
+        <div class="field">
+          <label for="f-brief">The brief, in two sentences</label>
+          <textarea id="f-brief" rows="4" placeholder="What you're building, who it's for, and when you need it." required></textarea>
+        </div>
+        <div class="form-foot">
+          <button class="btn-primary" type="submit">Send the brief →</button>
+          <span class="form-hint" id="contactHint">Or email <span style="color:var(--text);"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="1c74797070735c657d6f6f75727978747369757e3278796a">[email&#160;protected]</a></span> — I read everything.</span>
+        </div>
+      </form>
+
+      <aside class="chat" aria-label="Chat preview">
+        <div class="chat-head">Ask the AI version of me</div>
+        <div class="bubble user">What's your stack?</div>
+        <div class="bubble bot">Next.js, Node, Postgres, Figma, DaVinci, ESP32. Whatever the problem asks for.</div>
+        <div class="bubble user">Can you do hardware <em>and</em> web?</div>
+        <div class="bubble bot">That's most of what I do. The web part lets the hardware part show off.</div>
+      </aside>
+    </div>
+  </section>
+  </main>
+
+  <!-- ============================================================
+       Footer
+       ============================================================ -->
+  <footer class="footer">
+    <div class="footer-top">
+      <p class="footer-statement">Built, not <em>bought.</em></p>
+      <nav class="footer-links" aria-label="Elsewhere">
+        <a href="#">GitHub</a>
+        <a href="#">LinkedIn</a>
+        <a href="#">Read.cv</a>
+        <a href="/cdn-cgi/l/email-protection#3f575a5353507f465e4c4c56515a5b57504a565d115b5a49">Email</a>
+      </nav>
+    </div>
+    <p class="footer-mark" aria-hidden="true">YD</p>
+    <div class="footer-meta">
+      <span>© Y. Dhouib 2026 — Sfax, TN</span>
+      <span>Hand-coded · No frameworks · No invoices</span>
+    </div>
+  </footer>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+  /* ============================================================
+     Shift-key dark-mode toggle
+     ============================================================ */
+  (function () {
+    const html = document.documentElement;
+    const key = document.getElementById('themeToggle');
+    const STORE = 'yd-theme';
+    const saved = localStorage.getItem(STORE);
+    if (saved === 'dark') html.setAttribute('data-theme', 'dark');
+
+    key.addEventListener('click', () => {
+      const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      localStorage.setItem(STORE, next);
+    });
+
+    // Also trigger on physical Shift press (real easter egg)
+    let lastShift = 0;
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Shift' && !e.repeat) {
+        const now = Date.now();
+        if (now - lastShift < 400) {
+          // double-tap shift toggles theme
+          key.click();
+          // visual press feedback
+          key.classList.add('is-pressed');
+          setTimeout(() => key.classList.remove('is-pressed'), 140);
+        }
+        lastShift = now;
+      }
+    });
+  })();
+
+  /* ============================================================
+     Marquee — duplicate content for seamless scroll
+     ============================================================ */
+  (function () {
+    const row = document.getElementById('tickerRow');
+    if (!row) return;
+    row.insertAdjacentHTML('beforeend', row.innerHTML);
+  })();
+
+  /* ============================================================
+     KPI count-up — runs once on load
+     ============================================================ */
+  (function () {
+    const els = document.querySelectorAll('[data-count]');
+    const start = performance.now();
+    const delay = 1100; // sync with KPI fade-in
+    const dur = 1100;
+    const ease = (t) => 1 - Math.pow(1 - t, 3);
+
+    function tick(now) {
+      const elapsed = now - start - delay;
+      if (elapsed < 0) { requestAnimationFrame(tick); return; }
+      const t = Math.min(1, elapsed / dur);
+      const k = ease(t);
+      els.forEach((el) => {
+        const target = +el.dataset.count;
+        el.textContent = Math.round(target * k).toString();
+      });
+      if (t < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  })();
+</script>
+
+</body>
+</html>

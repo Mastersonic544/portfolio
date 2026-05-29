@@ -52,6 +52,11 @@
           class:active={$page.url.pathname.startsWith('/shift-admin/projects')}
           href="/shift-admin/projects"
         >Projects</a>
+        <a
+          class="tab"
+          class:active={$page.url.pathname.startsWith('/shift-admin/migrate')}
+          href="/shift-admin/migrate"
+        >Migrate</a>
       </nav>
 
       <button class="logout-btn" onclick={handleLogout}>Log out</button>
@@ -149,6 +154,15 @@
     border-color: var(--text-muted);
   }
 
+  @media (max-width: 640px) {
+    .admin-header { height: auto; min-height: 48px; flex-wrap: wrap; padding: 0 1rem; gap: 0; }
+    .brand { padding: 0.75rem 1rem 0.75rem 0; font-size: 0.75rem; }
+    .tab-nav { order: 3; width: 100%; overflow-x: auto; scrollbar-width: none; border-top: 1px solid var(--bg-card); }
+    .tab-nav::-webkit-scrollbar { display: none; }
+    .tab { padding: 0 0.875rem; font-size: 0.75rem; height: 40px; white-space: nowrap; }
+    .logout-btn { margin-left: 0; padding: 0.25rem 0.625rem; font-size: 0.72rem; }
+  }
+
   /* ── Main area ──────────────────────────────── */
   .admin-main {
     flex: 1;
@@ -157,5 +171,9 @@
     width: 100%;
     margin: 0 auto;
     box-sizing: border-box;
+  }
+
+  @media (max-width: 480px) {
+    .admin-main { padding: 1.5rem 1rem; }
   }
 </style>

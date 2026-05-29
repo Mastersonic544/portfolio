@@ -250,4 +250,10 @@
   @media (max-width: 768px) {
     .kpi-row { grid-template-columns: 1fr; }
   }
+
+  @media (max-width: 480px) {
+    .dashboard { gap: 1.75rem; }
+    .page-header { flex-wrap: wrap; gap: 0.625rem; }
+    .hm-row { grid-template-columns: 100px 1fr 36px; }
+  }
 </style>

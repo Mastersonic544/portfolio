@@ -66,7 +66,10 @@
 
   <div class="page-header">
     <h1 class="page-title">Projects</h1>
-    <a class="add-btn" href="/shift-admin/projects/add">+ Add Project</a>
+    <div class="header-actions">
+      <a class="seed-link" href="/shift-admin/projects/seed">Bulk Import</a>
+      <a class="add-btn" href="/shift-admin/projects/add">+ Add Project</a>
+    </div>
   </div>
 
   <!-- Filters -->
@@ -108,7 +111,7 @@
           <!-- Thumbnail -->
           <div class="thumb">
             <img
-              src="/images/projects/{p.slug ?? p.id}-thumb.webp"
+              src={p.thumbUrl || `/images/projects/${p.slug ?? p.id}-thumb.webp`}
               alt={p.title}
               onerror={(e) => { /** @type {HTMLImageElement} */ (e.currentTarget).style.display = 'none'; }}
             />
@@ -166,6 +169,26 @@
     letter-spacing: -0.03em;
     color: var(--text);
   }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+  }
+
+  .seed-link {
+    background: transparent;
+    border: 1px solid var(--text-muted);
+    color: var(--text-muted);
+    padding: 0.55rem 1.25rem;
+    font-family: var(--font-body);
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: color 0.15s ease, border-color 0.15s ease;
+  }
+
+  .seed-link:hover { color: var(--text); border-color: var(--text); }
 
   .add-btn {
     background: var(--accent);
@@ -316,5 +339,19 @@
     font-family: var(--font-body);
     font-size: 0.82rem;
     color: var(--text-muted);
+  }
+
+  @media (max-width: 640px) {
+    .page-header { flex-wrap: wrap; gap: 0.5rem; }
+    .header-actions { flex-wrap: wrap; }
+    .p-row { grid-template-columns: 60px 1fr; row-gap: 0.5rem; }
+    .p-actions { grid-column: 1 / -1; justify-content: flex-end; }
+    .thumb { width: 60px; height: 34px; }
+  }
+
+  @media (max-width: 480px) {
+    .p-row { grid-template-columns: 1fr; }
+    .thumb { display: none; }
+    .p-actions { grid-column: 1; }
   }
 </style>
