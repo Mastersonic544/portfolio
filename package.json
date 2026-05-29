@@ -28,5 +28,8 @@
     "motion": "^11.0.0",
     "phosphor-svelte": "^2.0.0"
   },
-  "type": "module"
+  "type": "module",
+  "engines": {
+    "node": "20.x"
+  }
 }
