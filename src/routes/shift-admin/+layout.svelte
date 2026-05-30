@@ -54,6 +54,16 @@
         >Projects</a>
         <a
           class="tab"
+          class:active={$page.url.pathname.startsWith('/shift-admin/cvs')}
+          href="/shift-admin/cvs"
+        >CVs</a>
+        <a
+          class="tab"
+          class:active={$page.url.pathname.startsWith('/shift-admin/chatlogs')}
+          href="/shift-admin/chatlogs"
+        >Chat Logs</a>
+        <a
+          class="tab"
           class:active={$page.url.pathname.startsWith('/shift-admin/migrate')}
           href="/shift-admin/migrate"
         >Migrate</a>

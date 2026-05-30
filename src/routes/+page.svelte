@@ -5,11 +5,52 @@
   import Projects from '$lib/components/public/Projects.svelte';
   import Highlights from '$lib/components/public/Highlights.svelte';
   import Teaching from '$lib/components/public/Teaching.svelte';
+  import CTA from '$lib/components/public/CTA.svelte';
   import AvailabilityBanner from '$lib/components/public/AvailabilityBanner.svelte';
   import Contact from '$lib/components/public/Contact.svelte';
   import FAQ from '$lib/components/public/FAQ.svelte';
   import Footer from '$lib/components/public/Footer.svelte';
   import Chatbot from '$lib/components/public/Chatbot.svelte';
+
+  /** @type {{ data: { projects: { title: string; slug: string; description: string; category: string; status: string; thumbUrl: string; position: number }[] } }} */
+  let { data } = $props();
+
+  const SITE_URL = 'https://yassinedhouib.vercel.app';
+
+  const personSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Person',
+    name: 'Yassine Dhouib',
+    alternateName: 'Shift',
+    url: SITE_URL,
+    jobTitle: 'Full Stack Developer & Creative Technologist',
+    description: 'Freelance full stack developer, UI/UX designer, and coding mentor based in Sfax, Tunisia.',
+    address: { '@type': 'PostalAddress', addressLocality: 'Sfax', addressCountry: 'TN' },
+    email: 'yassine.m.dhouib@gmail.com',
+    telephone: '+21654489995',
+    sameAs: [
+      'https://www.linkedin.com/in/yassine-dhouib-798092266/',
+      'https://github.com/Mastersonic544'
+    ]
+  };
+
+  const projectsSchema = $derived({
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: "Yassine Dhouib's Projects",
+    url: `${SITE_URL}/#projects`,
+    itemListElement: data.projects.map((p, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      item: {
+        '@type': 'CreativeWork',
+        name: p.title,
+        description: p.description || undefined,
+        url: `${SITE_URL}/#projects`,
+        author: { '@type': 'Person', name: 'Yassine Dhouib' }
+      }
+    }))
+  });
 </script>
 
 <svelte:head>
@@ -19,34 +60,23 @@
   <meta name="author" content="Yassine Dhouib" />
 
   <meta property="og:type"        content="website" />
-  <meta property="og:url"         content="https://yassinedhouib.netlify.app" />
+  <meta property="og:url"         content="{SITE_URL}" />
   <meta property="og:title"       content="Shift — Yassine Dhouib | Developer, Designer, Teacher" />
   <meta property="og:description" content="Yassine Dhouib (Shift) — freelance full stack developer, UI/UX designer, and coding mentor based in Sfax, Tunisia. Available for remote work worldwide." />
-  <meta property="og:image"       content="https://yassinedhouib.netlify.app/images/og.webp" />
+  <meta property="og:image"       content="{SITE_URL}/images/og.webp" />
 
   <meta name="twitter:card"        content="summary_large_image" />
   <meta name="twitter:site"        content="@yassinedhouib" />
   <meta name="twitter:title"       content="Shift — Yassine Dhouib | Developer, Designer, Teacher" />
   <meta name="twitter:description" content="Yassine Dhouib (Shift) — freelance full stack developer, UI/UX designer, and coding mentor based in Sfax, Tunisia. Available for remote work worldwide." />
-  <meta name="twitter:image"       content="https://yassinedhouib.netlify.app/images/og.webp" />
+  <meta name="twitter:image"       content="{SITE_URL}/images/og.webp" />
 
-  <link rel="canonical" href="https://yassinedhouib.netlify.app" />
+  <link rel="canonical" href="{SITE_URL}" />
 
-  <script type="application/ld+json">{JSON.stringify({
-    "@context": "https://schema.org",
-    "@type": "Person",
-    "name": "Yassine Dhouib",
-    "alternateName": "Shift",
-    "url": "https://yassinedhouib.netlify.app",
-    "jobTitle": "Full Stack Developer & Creative Technologist",
-    "description": "Freelance full stack developer, UI/UX designer, and coding mentor based in Sfax, Tunisia. Available for remote freelance work worldwide.",
-    "address": { "@type": "PostalAddress", "addressLocality": "Sfax", "addressCountry": "TN" },
-    "email": "yassine.m.dhouib@gmail.com",
-    "sameAs": [
-      "https://www.linkedin.com/in/yassine-dhouib-798092266/",
-      "https://github.com/Mastersonic544"
-    ]
-  })}</script>
+  <script type="application/ld+json">{JSON.stringify(personSchema)}</script>
+  {#if data.projects.length > 0}
+    <script type="application/ld+json">{JSON.stringify(projectsSchema)}</script>
+  {/if}
 </svelte:head>
 
 <Hero />
@@ -55,6 +85,7 @@
 <Projects />
 <Highlights />
 <Teaching />
+<CTA />
 <AvailabilityBanner />
 <Contact />
 <FAQ />

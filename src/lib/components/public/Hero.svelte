@@ -6,6 +6,7 @@
   import { db } from '$lib/firebase.js';
   import { theme } from '$lib/stores/theme.js';
   import { logClick } from '$lib/utils/analytics.js';
+  import CvModal from './CvModal.svelte';
 
   const roles = ['Graphic Designer', 'Video Editor', 'Web Developer', 'Mobile Developer', 'Full Stack Developer', 'Creative Technologist', 'UI/UX Designer'];
 
@@ -17,24 +18,25 @@
   let contactPhone   = $state('');
   let services       = $state([]);
   let loaded         = $state(false);
+  let cvOpen         = $state(false);
 
   /** @type {HTMLElement} */
   let heroEl;
   let currentRoleText = $state(roles[0]);
-  let isMounted = true;
+  let isMounted  = true;
+  let heroInView = false;
 
   function toggleTheme() {
     theme.update(t => (t === 'light' ? 'dark' : 'light'));
   }
 
   function triggerHaptic() {
+    if (!heroInView) return;
     try {
       if (typeof navigator !== 'undefined' && navigator.vibrate) {
         navigator.vibrate(10);
       }
-    } catch (_) {
-      // Fail silently
-    }
+    } catch (_) { /* silent */ }
   }
 
   async function startRoleTypewriter() {
@@ -89,6 +91,31 @@
     logClick('hero');
     const unsub = theme.subscribe(v => document.documentElement.setAttribute('data-theme', v));
 
+    // Haptic only fires when hero is visible
+    const observer = new IntersectionObserver(
+      ([entry]) => { heroInView = entry.isIntersecting; },
+      { threshold: 0.1 }
+    );
+    observer.observe(heroEl);
+
+    // Physical Shift key (standalone press, no other modifier) → toggle theme
+    let shiftOnly = false;
+    function onKeydown(/** @type {KeyboardEvent} */ e) {
+      if (e.key === 'Shift' && !e.ctrlKey && !e.altKey && !e.metaKey) {
+        shiftOnly = true;
+      } else {
+        shiftOnly = false;
+      }
+    }
+    function onKeyup(/** @type {KeyboardEvent} */ e) {
+      if (e.key === 'Shift' && shiftOnly) {
+        toggleTheme();
+        shiftOnly = false;
+      }
+    }
+    window.addEventListener('keydown', onKeydown);
+    window.addEventListener('keyup',   onKeyup);
+
     try {
       const snap = await getDocs(
         query(collection(db, 'sections'), where('name', '==', 'hero'), limit(1))
@@ -114,6 +141,9 @@
 
     return () => {
       isMounted = false;
+      observer.disconnect();
+      window.removeEventListener('keydown', onKeydown);
+      window.removeEventListener('keyup',   onKeyup);
       unsub();
     };
   });
@@ -123,6 +153,8 @@
   <span class="arrow">⇧</span>
   <span>Shift</span>
 </button>
+
+<CvModal open={cvOpen} onclose={() => (cvOpen = false)} />
 
 <section class="hero" bind:this={heroEl}>
   <!-- Ghost Watermark -->
@@ -160,11 +192,16 @@
         <span class="block-label">Contact</span>
         <div class="block-text">
           {#if contactLocation}<p>{contactLocation}</p>{/if}
-          {#if contactEmail}<p>{contactEmail}</p>{/if}
-          {#if contactPhone}<p>{contactPhone}</p>{/if}
+          {#if contactEmail}<a href="mailto:{contactEmail}" class="contact-link">{contactEmail}</a>{/if}
+          {#if contactPhone}<a href="tel:{contactPhone.replace(/\s/g,'')}" class="contact-link">{contactPhone}</a>{/if}
         </div>
       </div>
       {/if}
+
+      <div class="hero-cta-row">
+        <a class="hero-btn hero-btn-primary" href="#contact">Get in touch</a>
+        <button class="hero-btn hero-btn-outline" onclick={() => (cvOpen = true)}>Download CV</button>
+      </div>
 
       {#if services.length}
       <div class="info-block">
@@ -430,6 +467,40 @@
     margin: 0;
   }
   .block-text p { margin: 0; }
+
+  .contact-link {
+    display: block;
+    color: var(--text);
+    text-decoration: none;
+    font-size: 15px;
+    line-height: 1.7;
+    transition: color 0.15s ease;
+  }
+  .contact-link:hover { color: var(--accent); }
+
+  .hero-cta-row {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-top: 0.5rem;
+  }
+
+  .hero-btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.625rem 1.25rem;
+    font-family: var(--font-body);
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+    transition: opacity 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+  }
+  .hero-btn-primary { background: var(--accent); color: #fff; }
+  .hero-btn-primary:hover { opacity: 0.88; }
+  .hero-btn-outline { background: transparent; border: 1.5px solid var(--text-muted); color: var(--text); }
+  .hero-btn-outline:hover { border-color: var(--text); }
 
   .photo-col {
     grid-area: photo;
