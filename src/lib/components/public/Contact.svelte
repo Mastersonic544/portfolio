@@ -120,7 +120,7 @@
 
   .section-label { display: block; font-family: var(--font-body); font-size: 0.68rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text-muted); margin-bottom: 0.75rem; }
 
-  .section-title { font-family: var(--font-heading); font-size: clamp(2rem, 4vw, 3rem); font-weight: 700; letter-spacing: -0.03em; color: var(--text); margin-bottom: 0.875rem; }
+  .section-title { font-family: var(--font-heading); font-size: clamp(1.5rem, 4vw, 3rem); font-weight: 700; letter-spacing: -0.03em; color: var(--text); margin-bottom: 0.875rem; }
 
   .subtitle { font-family: var(--font-body); font-size: 0.95rem; line-height: 1.7; color: var(--text-muted); margin-bottom: 2rem; }
 

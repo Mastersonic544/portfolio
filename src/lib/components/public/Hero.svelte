@@ -383,7 +383,7 @@
   .headline {
     font-family: var(--font-heading);
     font-weight: 800;
-    font-size: clamp(2.4rem, 5.5vw, 5rem);
+    font-size: clamp(1.75rem, 5.5vw, 5rem);
     line-height: 1.05;
     letter-spacing: -0.03em;
     margin: 0;

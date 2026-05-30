@@ -109,7 +109,7 @@
   .section-title {
     font-family: var(--font-heading);
     font-weight: 800;
-    font-size: clamp(36px, 4.6vw, 64px);
+    font-size: clamp(26px, 4.6vw, 64px);
     letter-spacing: -0.03em;
     line-height: 1.0;
     margin: 0;

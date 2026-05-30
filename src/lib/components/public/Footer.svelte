@@ -44,7 +44,7 @@
   .footer-statement {
     font-family: var(--font-heading);
     font-weight: 800;
-    font-size: clamp(40px, 6vw, 88px);
+    font-size: clamp(28px, 6vw, 88px);
     letter-spacing: -0.035em;
     line-height: 0.95;
     margin: 0;

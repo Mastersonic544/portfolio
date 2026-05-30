@@ -66,7 +66,7 @@
 
   .section-label { display: block; font-family: var(--font-body); font-size: 0.68rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text-muted); margin-bottom: 0.75rem; }
 
-  .heading { font-family: var(--font-heading); font-size: clamp(1.75rem, 3vw, 2.75rem); font-weight: 700; letter-spacing: -0.03em; line-height: 1.15; color: var(--text); margin-bottom: 1.25rem; }
+  .heading { font-family: var(--font-heading); font-size: clamp(1.4rem, 3vw, 2.75rem); font-weight: 700; letter-spacing: -0.03em; line-height: 1.15; color: var(--text); margin-bottom: 1.25rem; }
 
   .desc { font-family: var(--font-body); font-size: 1rem; line-height: 1.8; color: var(--text-muted); margin-bottom: 2rem; max-width: 440px; }
 

@@ -66,7 +66,7 @@
 
   .cta-headline {
     font-family: var(--font-heading);
-    font-size: clamp(2.25rem, 5vw, 3.75rem);
+    font-size: clamp(1.5rem, 5vw, 3.75rem);
     font-weight: 800;
     letter-spacing: -0.04em;
     line-height: 1.05;

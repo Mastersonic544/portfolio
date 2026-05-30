@@ -72,7 +72,7 @@
 
   .section-title {
     font-family: var(--font-heading);
-    font-size: clamp(2rem, 4vw, 3rem);
+    font-size: clamp(1.5rem, 4vw, 3rem);
     font-weight: 700;
     letter-spacing: -0.03em;
     color: var(--text);

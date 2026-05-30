@@ -131,7 +131,7 @@
   .title {
     font-family: var(--font-heading);
     font-weight: 800;
-    font-size: clamp(32px, 4.2vw, 56px);
+    font-size: clamp(22px, 4.2vw, 56px);
     letter-spacing: -0.03em;
     line-height: 1.1;
     margin: 0;

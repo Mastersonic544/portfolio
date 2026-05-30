@@ -56,7 +56,7 @@
 
   .section-label { display: block; font-family: var(--font-body); font-size: 0.68rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text-muted); margin-bottom: 0.75rem; }
 
-  .section-title { font-family: var(--font-heading); font-size: clamp(2rem, 4vw, 3rem); font-weight: 700; letter-spacing: -0.03em; color: var(--text); margin-bottom: 3rem; }
+  .section-title { font-family: var(--font-heading); font-size: clamp(1.5rem, 4vw, 3rem); font-weight: 700; letter-spacing: -0.03em; color: var(--text); margin-bottom: 3rem; }
 
   .card-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
 
