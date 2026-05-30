@@ -6,6 +6,7 @@
   import Highlights from '$lib/components/public/Highlights.svelte';
   import Teaching from '$lib/components/public/Teaching.svelte';
   import CTA from '$lib/components/public/CTA.svelte';
+  import MiniCTA from '$lib/components/public/MiniCTA.svelte';
   import AvailabilityBanner from '$lib/components/public/AvailabilityBanner.svelte';
   import Contact from '$lib/components/public/Contact.svelte';
   import FAQ from '$lib/components/public/FAQ.svelte';
@@ -97,14 +98,14 @@
 </svelte:head>
 
 <Hero />
-<About />
-<Services />
-<Projects />
-<Highlights />
-<Teaching />
+<About /><MiniCTA />
+<Services /><MiniCTA />
+<Projects /><MiniCTA />
+<Highlights /><MiniCTA />
+<Teaching /><MiniCTA />
 <CTA />
 <AvailabilityBanner />
 <Contact />
-<FAQ />
+<FAQ /><MiniCTA />
 <Footer />
 <Chatbot />

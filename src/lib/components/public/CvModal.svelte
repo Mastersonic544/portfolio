@@ -65,32 +65,33 @@
     <div class="modal-body">
       {#if loading}
         <p class="hint">Loading…</p>
-      {:else if cvs.length === 0}
+      {:else if cvs.length === 0 && !resumeUrl}
         <p class="hint">No CVs available yet.</p>
       {:else}
-        <p class="modal-desc">Choose a version to download:</p>
-
-        <div class="cv-grid">
-          {#each cvs as cv}
-            {@const Icon = ICON_MAP[cv.icon] ?? FileText}
-            <a
-              class="cv-card"
-              href={cv.url}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <div class="card-icon">
-                <Icon size={20} weight="regular" />
-              </div>
-              <span class="card-label">{cv.label}</span>
-              <span class="card-dl">Download ↓</span>
-            </a>
-          {/each}
-        </div>
+        {#if cvs.length > 0}
+          <p class="modal-desc">Choose a version to download:</p>
+          <div class="cv-grid">
+            {#each cvs as cv}
+              {@const Icon = ICON_MAP[cv.icon] ?? FileText}
+              <a
+                class="cv-card"
+                href={cv.url}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <div class="card-icon">
+                  <Icon size={20} weight="regular" />
+                </div>
+                <span class="card-label">{cv.label}</span>
+                <span class="card-dl">Download ↓</span>
+              </a>
+            {/each}
+          </div>
+        {/if}
 
         {#if resumeUrl}
-          <div class="resume-row">
-            <span class="resume-or">or</span>
+          <div class="resume-row" class:has-border={cvs.length > 0}>
+            {#if cvs.length > 0}<span class="resume-or">or</span>{/if}
             <a
               class="resume-btn"
               href={resumeUrl}
@@ -233,6 +234,9 @@
     display: flex;
     align-items: center;
     gap: 1rem;
+    padding-top: 0.5rem;
+  }
+  .resume-row.has-border {
     padding-top: 1rem;
     border-top: 1px solid var(--border);
   }

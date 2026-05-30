@@ -1,5 +1,16 @@
 <script>
-  // Footer links pointing to Yassine's official profiles
+  import { onMount } from 'svelte';
+  import { doc, getDoc } from 'firebase/firestore';
+  import { db } from '$lib/firebase.js';
+
+  let resumeUrl = $state('');
+
+  onMount(async () => {
+    try {
+      const snap = await getDoc(doc(db, 'settings', 'cvs'));
+      if (snap.exists()) resumeUrl = snap.data().resumeUrl ?? '';
+    } catch { /* silent */ }
+  });
 </script>
 
 <footer class="footer">
@@ -8,7 +19,9 @@
     <nav class="footer-links" aria-label="Elsewhere">
       <a href="https://github.com/Mastersonic544" target="_blank" rel="noopener noreferrer">GitHub</a>
       <a href="https://www.linkedin.com/in/yassine-dhouib-798092266/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
-      <a href="https://read.cv" target="_blank" rel="noopener noreferrer">Read.cv</a>
+      {#if resumeUrl}
+        <a href={resumeUrl} target="_blank" rel="noopener noreferrer">Read Resume</a>
+      {/if}
       <a href="mailto:yassine.m.dhouib@gmail.com">Email</a>
     </nav>
   </div>
