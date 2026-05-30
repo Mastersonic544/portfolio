@@ -25,6 +25,13 @@
   let loomUrl      = $state('');
   let previewUrl   = $state('');
   let previewLabel = $state('');
+  /* ── Digital showcase (Behance / external link) ─ */
+  let behanceUrl   = $state('');
+  let behanceLabel = $state('Behance');
+  /* ── Academic doc (presentation / PDF link) ───── */
+  let documentUrl   = $state('');
+  let documentLabel = $state('View PDF');
+  let showcaseNote = $state('');
   let published    = $state(false);
 
   /* ── Image upload ───────────────────────────── */
@@ -91,7 +98,12 @@
   "article": "string (full markdown article, 3-5 paragraphs)",
   "stack": ["string"] (only for dev projects, else empty array),
   "kpis": [{"label": "string", "value": "string"}] (3-5 metrics),
-  "status": "Live" | "In Progress" | "Case Study"
+  "status": "Live" | "In Progress" | "Case Study",
+  "behance": "string" (ONLY for digital projects — URL to the Behance/portfolio/video showcase, else ""),
+  "behanceLabel": "string" (ONLY for digital — button label, defaults to "Behance", else ""),
+  "document": "string" (ONLY for pfe/academic projects — URL to the presentation/PDF/docs, else ""),
+  "documentLabel": "string" (ONLY for pfe/academic — button label, defaults to "View PDF", else ""),
+  "showcaseNote": "string" (ONLY for digital or pfe — one short sentence introducing the link, else "")
 }
 
 My project: [DESCRIBE YOUR PROJECT HERE]`;
@@ -124,6 +136,11 @@ My project: [DESCRIBE YOUR PROJECT HERE]`;
     stackStr    = (parsed.stack ?? []).join(', ');
     kpis        = parsed.kpis?.length ? parsed.kpis.map((/** @type {any} */ k) => ({ label: k.label ?? '', value: k.value ?? '' })) : [{ label: '', value: '' }];
     status      = parsed.status ?? 'Live';
+    behanceUrl    = parsed.behance       ?? '';
+    behanceLabel  = parsed.behanceLabel  || 'Behance';
+    documentUrl   = parsed.document      ?? '';
+    documentLabel = parsed.documentLabel || 'View PDF';
+    showcaseNote  = parsed.showcaseNote  ?? '';
     step        = 2;
   }
 
@@ -175,12 +192,26 @@ My project: [DESCRIBE YOUR PROJECT HERE]`;
     try {
       const slug  = slugify(title);
       const links = /** @type {Record<string, string>} */ ({});
-      if (githubUrl.trim()) links.github = githubUrl.trim();
-      if (demoUrl.trim())   links.demo   = demoUrl.trim();
-      if (loomUrl.trim())   links.loom   = loomUrl.trim();
-      if (previewUrl.trim()) {
-        links.preview      = previewUrl.trim();
-        links.previewLabel = previewLabel.trim() || 'Visit Platform';
+      if (category === 'digital') {
+        // Digital work showcases through an external link (Behance, video, gallery…) — no GitHub.
+        if (behanceUrl.trim()) {
+          links.behance      = behanceUrl.trim();
+          links.behanceLabel = behanceLabel.trim() || 'Behance';
+        }
+      } else if (category === 'pfe') {
+        // Academic work showcases through a document link (presentation, PDF, docs…) — no GitHub.
+        if (documentUrl.trim()) {
+          links.document      = documentUrl.trim();
+          links.documentLabel = documentLabel.trim() || 'View PDF';
+        }
+      } else {
+        if (githubUrl.trim()) links.github = githubUrl.trim();
+        if (demoUrl.trim())   links.demo   = demoUrl.trim();
+        if (loomUrl.trim())   links.loom   = loomUrl.trim();
+        if (previewUrl.trim()) {
+          links.preview      = previewUrl.trim();
+          links.previewLabel = previewLabel.trim() || 'Visit Platform';
+        }
       }
 
       await addDoc(collection(db, 'projects'), {
@@ -190,10 +221,11 @@ My project: [DESCRIBE YOUR PROJECT HERE]`;
         tags:        tagsStr.split(',').map((t) => t.trim()).filter(Boolean),
         description: description.trim(),
         article:     article.trim(),
-        stack:       stackStr.split(',').map((t) => t.trim()).filter(Boolean),
+        stack:       category === 'digital' ? [] : stackStr.split(',').map((t) => t.trim()).filter(Boolean),
         kpis:        kpis.filter((k) => k.label && k.value),
         status,
         links,
+        showcaseNote: (category === 'digital' || category === 'pfe') ? showcaseNote.trim() : '',
         thumbUrl,
         published:   pub,
         createdAt:   serverTimestamp(),
@@ -374,31 +406,65 @@ My project: [DESCRIBE YOUR PROJECT HERE]`;
       </div>
 
       <!-- Links -->
-      <div class="field">
-        <label for="fld_0xmpw2">GitHub URL</label>
-        <input id="fld_0xmpw2" type="url" bind:value={githubUrl} placeholder="https://github.com/user/repo" />
-      </div>
+      {#if category === 'digital'}
+        <!-- Digital: external showcase link (Behance / video / gallery) — no GitHub -->
+        <div class="field">
+          <label for="fld_behurl">Showcase URL <span class="field-hint">Behance, Dribbble, video, gallery…</span></label>
+          <input id="fld_behurl" type="url" bind:value={behanceUrl} placeholder="https://www.behance.net/gallery/..." />
+        </div>
 
-      <div class="field">
-        <label for="fld_1up5zx">Demo URL</label>
-        <input id="fld_1up5zx" type="url" bind:value={demoUrl} placeholder="https://project.vercel.app" />
-      </div>
+        <div class="field">
+          <label for="fld_behlbl">Showcase Button Label <span class="field-hint">Defaults to Behance — switch to anything</span></label>
+          <input id="fld_behlbl" type="text" bind:value={behanceLabel} placeholder="Behance" />
+        </div>
 
-      <div class="field full">
-        <label for="fld_nli0o9">Loom URL</label>
-        <input id="fld_nli0o9" type="url" bind:value={loomUrl} placeholder="https://www.loom.com/share/..." />
-      </div>
+        <div class="field full">
+          <label for="fld_shownote">Showcase Note <span class="field-hint">Short paragraph shown next to the showcase button</span></label>
+          <textarea id="fld_shownote" rows="2" bind:value={showcaseNote} placeholder="See the full brand identity, moodboard and final deliverables on Behance."></textarea>
+        </div>
+      {:else if category === 'pfe'}
+        <!-- Academic: document link (presentation / PDF / docs) — no GitHub -->
+        <div class="field">
+          <label for="fld_docurl">Document URL <span class="field-hint">Presentation, PDF, Google Docs…</span></label>
+          <input id="fld_docurl" type="url" bind:value={documentUrl} placeholder="https://drive.google.com/file/d/..." />
+        </div>
 
-      <!-- Preview Platform Button -->
-      <div class="field">
-        <label for="fld_x134kl">Preview Platform URL <span class="field-hint">Actual platform website</span></label>
-        <input id="fld_x134kl" type="url" bind:value={previewUrl} placeholder="https://myplatform.com" />
-      </div>
+        <div class="field">
+          <label for="fld_doclbl">Document Button Label <span class="field-hint">Defaults to View PDF — switch to anything</span></label>
+          <input id="fld_doclbl" type="text" bind:value={documentLabel} placeholder="View PDF" />
+        </div>
 
-      <div class="field">
-        <label for="fld_tgj9xq">Preview Button Label <span class="field-hint">Text shown on button (e.g. Visit Platform, Open App)</span></label>
-        <input id="fld_tgj9xq" type="text" bind:value={previewLabel} placeholder="Visit Platform" />
-      </div>
+        <div class="field full">
+          <label for="fld_docnote">Document Note <span class="field-hint">Short paragraph shown next to the document button</span></label>
+          <textarea id="fld_docnote" rows="2" bind:value={showcaseNote} placeholder="Read the full thesis, defense slides and supporting research."></textarea>
+        </div>
+      {:else}
+        <div class="field">
+          <label for="fld_0xmpw2">GitHub URL</label>
+          <input id="fld_0xmpw2" type="url" bind:value={githubUrl} placeholder="https://github.com/user/repo" />
+        </div>
+
+        <div class="field">
+          <label for="fld_1up5zx">Demo URL</label>
+          <input id="fld_1up5zx" type="url" bind:value={demoUrl} placeholder="https://project.vercel.app" />
+        </div>
+
+        <div class="field full">
+          <label for="fld_nli0o9">Loom URL</label>
+          <input id="fld_nli0o9" type="url" bind:value={loomUrl} placeholder="https://www.loom.com/share/..." />
+        </div>
+
+        <!-- Preview Platform Button -->
+        <div class="field">
+          <label for="fld_x134kl">Preview Platform URL <span class="field-hint">Actual platform website</span></label>
+          <input id="fld_x134kl" type="url" bind:value={previewUrl} placeholder="https://myplatform.com" />
+        </div>
+
+        <div class="field">
+          <label for="fld_tgj9xq">Preview Button Label <span class="field-hint">Text shown on button (e.g. Visit Platform, Open App)</span></label>
+          <input id="fld_tgj9xq" type="text" bind:value={previewLabel} placeholder="Visit Platform" />
+        </div>
+      {/if}
 
       <!-- Image upload -->
       <div class="field full">

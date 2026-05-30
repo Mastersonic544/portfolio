@@ -16,6 +16,18 @@
   /** @type {HTMLElement | null} */
   let modalEl = $state(null);
 
+  // Resolves the external showcase link for digital (Behance) and academic (document) work
+  let showcase = $derived.by(() => {
+    if (!project) return null;
+    if (project.category === 'digital' && project.links?.behance) {
+      return { url: project.links.behance, label: project.links.behanceLabel || 'Behance' };
+    }
+    if (project.category === 'pfe' && project.links?.document) {
+      return { url: project.links.document, label: project.links.documentLabel || 'View PDF' };
+    }
+    return null;
+  });
+
   // Animate modal in when it opens; lock body scroll
   $effect(() => {
     if (!open) {
@@ -66,7 +78,7 @@
       <button class="close" onclick={() => onclose?.()} aria-label="Close">✕</button>
 
       <!-- Hero image -->
-      <div class="hero-img">
+      <div class="hero-img" class:digital={project.category === 'digital'}>
         <img src={project.thumbUrl || thumb(project.slug ?? project.id)} alt={project.title} />
       </div>
 
@@ -105,6 +117,20 @@
                 <span class="stack-tag">{tech}</span>
               {/each}
             </div>
+          </div>
+        {/if}
+
+        <!-- Showcase card — digital (Behance/gallery) & academic (PDF/docs) work -->
+        {#if showcase || project.showcaseNote}
+          <div class="showcase-card">
+            {#if project.showcaseNote}
+              <p class="showcase-note">{project.showcaseNote}</p>
+            {/if}
+            {#if showcase}
+              <a href={showcase.url} class="link-btn preview-btn showcase-btn" target="_blank" rel="noopener noreferrer">
+                {showcase.label} →
+              </a>
+            {/if}
           </div>
         {/if}
 
@@ -207,6 +233,19 @@
     height: 100%;
     object-fit: cover;
     display: block;
+  }
+
+  /* Digital work: show the full graphic (logo, brand board) without cropping */
+  .hero-img.digital {
+    aspect-ratio: auto;
+    max-height: 70vh;
+    padding: 1.25rem;
+    box-sizing: border-box;
+  }
+
+  .hero-img.digital img {
+    object-fit: contain;
+    max-height: calc(70vh - 2.5rem);
   }
 
   /* ── Modal body padding ──────────────────────── */
@@ -335,6 +374,28 @@
     font-size: 0.75rem;
     font-weight: 500;
   }
+
+  /* ── Showcase card (digital) ─────────────────── */
+  .showcase-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+    border: 1px solid var(--bg-card);
+    border-left: 3px solid var(--accent);
+    padding: 1.25rem 1.375rem;
+    border-radius: 4px;
+  }
+
+  .showcase-note {
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    line-height: 1.7;
+    color: var(--text-muted);
+    margin: 0;
+  }
+
+  .showcase-btn { letter-spacing: 0.02em; }
 
   /* ── Links ───────────────────────────────────── */
   .links {
