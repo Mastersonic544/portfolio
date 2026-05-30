@@ -15,7 +15,7 @@
   /** @type {{ data: { projects: { title: string; slug: string; description: string; category: string; status: string; thumbUrl: string; position: number }[] } }} */
   let { data } = $props();
 
-  const SITE_URL = 'https://yassinedhouib.vercel.app';
+  const SITE_URL = 'https://yassinedhouib.dev';
 
   const personSchema = {
     '@context': 'https://schema.org',
@@ -23,6 +23,7 @@
     name: 'Yassine Dhouib',
     alternateName: 'Shift',
     url: SITE_URL,
+    image: `${SITE_URL}/images/og.webp`,
     jobTitle: 'Full Stack Developer & Creative Technologist',
     description: 'Freelance full stack developer, UI/UX designer, and coding mentor based in Sfax, Tunisia.',
     address: { '@type': 'PostalAddress', addressLocality: 'Sfax', addressCountry: 'TN' },
@@ -32,6 +33,15 @@
       'https://www.linkedin.com/in/yassine-dhouib-798092266/',
       'https://github.com/Mastersonic544'
     ]
+  };
+
+  const websiteSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'Yassine Dhouib — Shift',
+    url: SITE_URL,
+    description: 'Portfolio of Yassine Dhouib (Shift), full stack developer and creative technologist based in Sfax, Tunisia.',
+    author: { '@type': 'Person', name: 'Yassine Dhouib' }
   };
 
   const projectsSchema = $derived({
@@ -55,24 +65,31 @@
 
 <svelte:head>
   <title>Shift — Yassine Dhouib | Developer, Designer, Teacher</title>
-  <meta name="description" content="Yassine Dhouib (Shift) — freelance full stack developer, UI/UX designer, and coding mentor based in Sfax, Tunisia. Available for remote work worldwide." />
-  <meta name="keywords" content="Yassine Dhouib, Shift developer, freelance developer Tunisia, full stack developer Sfax, SvelteKit, React, Firebase, graphic design, video editing, PFE help Tunisia" />
-  <meta name="author" content="Yassine Dhouib" />
+  <meta name="description"  content="Yassine Dhouib (Shift) — freelance full stack developer, UI/UX designer, and coding mentor based in Sfax, Tunisia. Available for remote work worldwide." />
+  <meta name="keywords"     content="Yassine Dhouib, Shift developer, freelance developer Tunisia, full stack developer Sfax, SvelteKit, React, Flutter, Firebase, graphic design, video editing, PFE help Tunisia, coding mentor" />
+  <meta name="author"       content="Yassine Dhouib" />
+  <meta name="robots"       content="index, follow" />
 
   <meta property="og:type"        content="website" />
-  <meta property="og:url"         content="{SITE_URL}" />
+  <meta property="og:url"         content="{SITE_URL}/" />
   <meta property="og:title"       content="Shift — Yassine Dhouib | Developer, Designer, Teacher" />
   <meta property="og:description" content="Yassine Dhouib (Shift) — freelance full stack developer, UI/UX designer, and coding mentor based in Sfax, Tunisia. Available for remote work worldwide." />
   <meta property="og:image"       content="{SITE_URL}/images/og.webp" />
+  <meta property="og:image:width"  content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt"    content="Yassine Dhouib — Shift portfolio" />
+  <meta property="og:locale"      content="en_US" />
+  <meta property="og:site_name"   content="Shift — Yassine Dhouib" />
 
   <meta name="twitter:card"        content="summary_large_image" />
-  <meta name="twitter:site"        content="@yassinedhouib" />
   <meta name="twitter:title"       content="Shift — Yassine Dhouib | Developer, Designer, Teacher" />
   <meta name="twitter:description" content="Yassine Dhouib (Shift) — freelance full stack developer, UI/UX designer, and coding mentor based in Sfax, Tunisia. Available for remote work worldwide." />
   <meta name="twitter:image"       content="{SITE_URL}/images/og.webp" />
+  <meta name="twitter:image:alt"   content="Yassine Dhouib — Shift portfolio" />
 
-  <link rel="canonical" href="{SITE_URL}" />
+  <link rel="canonical" href="{SITE_URL}/" />
 
+  <script type="application/ld+json">{JSON.stringify(websiteSchema)}</script>
   <script type="application/ld+json">{JSON.stringify(personSchema)}</script>
   {#if data.projects.length > 0}
     <script type="application/ld+json">{JSON.stringify(projectsSchema)}</script>
