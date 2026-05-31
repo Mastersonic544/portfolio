@@ -29,6 +29,7 @@ import { writable } from 'svelte/store';
  * @property {{ label: string, value: string }[]} [kpis]
  * @property {'Live'|'In Progress'|'Case Study'} [status]
  * @property {ProjectLinks} [links]
+ * @property {string[]} [screenshots]  Optional gallery of image URLs shown before the article (handy for private dev work)
  * @property {string} [showcaseNote]  Short paragraph shown beside the showcase link for digital / academic work
  * @property {string} [client]
  * @property {string} [year]

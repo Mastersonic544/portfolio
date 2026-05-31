@@ -39,6 +39,11 @@
   let thumbUrl        = $state('');
   let uploadStatus    = $state(/** @type {'idle'|'converting'|'uploading'|'done'|'error'} */ ('idle'));
 
+  /* ── Screenshots gallery (optional, dev) ──────── */
+  /** @type {string[]} */
+  let screenshots = $state([]);
+  let shotStatus  = $state(/** @type {'idle'|'working'|'error'} */ ('idle'));
+
   let saving      = $state(false);
   let saveError   = $state('');
 
@@ -175,6 +180,31 @@ My project: [DESCRIBE YOUR PROJECT HERE]`;
     }
   }
 
+  /** Converts & uploads one or more screenshots, appending each CDN URL to the gallery */
+  async function handleScreenshotUpload(/** @type {Event & { currentTarget: HTMLInputElement }} */ e) {
+    const files = e.currentTarget.files;
+    if (!files?.length) return;
+    shotStatus = 'working';
+    try {
+      const baseSlug = generatedSlug || 'project';
+      for (const file of Array.from(files)) {
+        const blob     = await convertToWebP(file);
+        const filename = `${baseSlug}-shot-${Date.now()}-${screenshots.length}.webp`;
+        const url      = await uploadToStorage(blob, 'projects', filename);
+        screenshots = [...screenshots, url];
+      }
+      shotStatus = 'idle';
+      e.currentTarget.value = '';
+    } catch {
+      shotStatus = 'error';
+    }
+  }
+
+  /** @param {number} i */
+  function removeScreenshot(i) {
+    screenshots = screenshots.filter((_, idx) => idx !== i);
+  }
+
   /** @param {string} str */
   function slugify(str) {
     return str.toLowerCase().trim()
@@ -225,6 +255,7 @@ My project: [DESCRIBE YOUR PROJECT HERE]`;
         kpis:        kpis.filter((k) => k.label && k.value),
         status,
         links,
+        screenshots: category === 'dev' ? screenshots : [],
         showcaseNote: (category === 'digital' || category === 'pfe') ? showcaseNote.trim() : '',
         thumbUrl,
         published:   pub,
@@ -493,6 +524,37 @@ My project: [DESCRIBE YOUR PROJECT HERE]`;
           <p class="upload-status error">Upload failed — check the dev server is running.</p>
         {/if}
       </div>
+
+      <!-- Screenshots gallery (optional — great for private projects without a repo/demo) -->
+      {#if category === 'dev'}
+        <div class="field full">
+          <label for="screenshots-input">Screenshots <span class="field-hint">optional — shown before the article. Ideal for private work with no public repo or demo.</span></label>
+          <input
+            id="screenshots-input"
+            type="file"
+            accept="image/*"
+            multiple
+            class="file-input"
+            onchange={handleScreenshotUpload}
+            disabled={shotStatus === 'working'}
+          />
+          {#if shotStatus === 'working'}
+            <p class="upload-status">Converting &amp; uploading…</p>
+          {:else if shotStatus === 'error'}
+            <p class="upload-status error">Upload failed — try again.</p>
+          {/if}
+          {#if screenshots.length}
+            <div class="shots-grid">
+              {#each screenshots as shot, i}
+                <div class="shot-thumb">
+                  <img src={shot} alt="Screenshot {i + 1}" />
+                  <button type="button" class="shot-remove" onclick={() => removeScreenshot(i)} aria-label="Remove screenshot">×</button>
+                </div>
+              {/each}
+            </div>
+          {/if}
+        </div>
+      {/if}
 
       <!-- Published toggle -->
       <div class="field full">
@@ -770,7 +832,44 @@ My project: [DESCRIBE YOUR PROJECT HERE]`;
 
   .image-preview img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
+  /* Screenshots gallery editor */
+  .shots-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 0.6rem;
+    margin-top: 0.6rem;
+  }
 
+  .shot-thumb {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    background: var(--bg-card);
+    overflow: hidden;
+    border-radius: 3px;
+  }
+
+  .shot-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  .shot-remove {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 20px;
+    height: 20px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.6);
+    color: #fff;
+    font-size: 0.85rem;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s ease;
+  }
+
+  .shot-remove:hover { background: #e53e3e; }
 
   /* Upload status messages */
   .upload-status {

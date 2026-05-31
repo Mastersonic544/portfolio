@@ -154,6 +154,17 @@
           </div>
         {/if}
 
+        <!-- Screenshots gallery — shown before the article -->
+        {#if project.screenshots?.length}
+          <div class="screenshots">
+            {#each project.screenshots as shot, i}
+              <a class="shot" href={shot} target="_blank" rel="noopener noreferrer">
+                <img src={shot} alt={`${project.title} screenshot ${i + 1}`} loading="lazy" />
+              </a>
+            {/each}
+          </div>
+        {/if}
+
         <!-- Article body -->
         {#if project.article}
           <div class="article">
@@ -433,6 +444,31 @@
     background: transparent;
     color: var(--accent);
   }
+
+  /* ── Screenshots gallery ─────────────────────── */
+  .screenshots {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 0.75rem;
+  }
+
+  .shot {
+    display: block;
+    overflow: hidden;
+    border: 1px solid var(--bg-card);
+    border-radius: 4px;
+    aspect-ratio: 16 / 9;
+  }
+
+  .shot img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.35s ease;
+  }
+
+  .shot:hover img { transform: scale(1.04); }
 
   /* ── Article markdown ────────────────────────── */
   .article {

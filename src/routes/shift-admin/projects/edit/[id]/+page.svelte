@@ -40,6 +40,11 @@
   let uploadStatus     = $state(/** @type {'idle'|'converting'|'uploading'|'done'|'error'} */ ('idle'));
   let existingThumbUrl = $state('');
 
+  /* ── Screenshots gallery (optional, dev) ──────── */
+  /** @type {string[]} */
+  let screenshots = $state([]);
+  let shotStatus  = $state(/** @type {'idle'|'working'|'error'} */ ('idle'));
+
   /* ── AI Article Generator ────────────────── */
   let aiContext    = $state('');
   let aiGenerating = $state(false);
@@ -111,6 +116,7 @@
     behanceLabel  = d.links?.behanceLabel || 'Behance';
     documentUrl   = d.links?.document ?? '';
     documentLabel = d.links?.documentLabel || 'View PDF';
+    screenshots   = Array.isArray(d.screenshots) ? d.screenshots : [];
     showcaseNote  = d.showcaseNote ?? '';
     published        = d.published    ?? false;
     thumbUrl         = d.thumbUrl     ?? '';
@@ -144,6 +150,31 @@
     } catch {
       uploadStatus = 'error';
     }
+  }
+
+  /** Converts & uploads one or more screenshots, appending each CDN URL to the gallery */
+  async function handleScreenshotUpload(/** @type {Event & { currentTarget: HTMLInputElement }} */ e) {
+    const files = e.currentTarget.files;
+    if (!files?.length) return;
+    shotStatus = 'working';
+    try {
+      const baseSlug = slug || 'project';
+      for (const file of Array.from(files)) {
+        const blob     = await convertToWebP(file);
+        const filename = `${baseSlug}-shot-${Date.now()}-${screenshots.length}.webp`;
+        const url      = await uploadToStorage(blob, 'projects', filename);
+        screenshots = [...screenshots, url];
+      }
+      shotStatus = 'idle';
+      e.currentTarget.value = '';
+    } catch {
+      shotStatus = 'error';
+    }
+  }
+
+  /** @param {number} i */
+  function removeScreenshot(i) {
+    screenshots = screenshots.filter((_, idx) => idx !== i);
   }
 
   /** @param {boolean} pub */
@@ -185,6 +216,7 @@
         kpis:        kpis.filter((k) => k.label && k.value),
         status,
         links,
+        screenshots: category === 'dev' ? screenshots : [],
         showcaseNote: (category === 'digital' || category === 'pfe') ? showcaseNote.trim() : '',
         thumbUrl,
         published:   pub,
@@ -431,6 +463,37 @@
         {/if}
       </div>
 
+      <!-- Screenshots gallery (optional — great for private projects without a repo/demo) -->
+      {#if category === 'dev'}
+        <div class="field full">
+          <label for="screenshots-input">Screenshots <span class="field-hint">optional — shown before the article. Ideal for private work with no public repo or demo.</span></label>
+          <input
+            id="screenshots-input"
+            type="file"
+            accept="image/*"
+            multiple
+            class="file-input"
+            onchange={handleScreenshotUpload}
+            disabled={shotStatus === 'working'}
+          />
+          {#if shotStatus === 'working'}
+            <p class="upload-status">Converting &amp; uploading…</p>
+          {:else if shotStatus === 'error'}
+            <p class="upload-status error">Upload failed — try again.</p>
+          {/if}
+          {#if screenshots.length}
+            <div class="shots-grid">
+              {#each screenshots as shot, i}
+                <div class="shot-thumb">
+                  <img src={shot} alt="Screenshot {i + 1}" />
+                  <button type="button" class="shot-remove" onclick={() => removeScreenshot(i)} aria-label="Remove screenshot">×</button>
+                </div>
+              {/each}
+            </div>
+          {/if}
+        </div>
+      {/if}
+
       <!-- Published toggle -->
       <div class="field full">
         <div class="pub-toggle-row">
@@ -581,6 +644,45 @@
 
   .image-preview { margin-top: 0.5rem; width: 160px; height: 90px; background: var(--bg-card); overflow: hidden; }
   .image-preview img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  /* Screenshots gallery editor */
+  .shots-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 0.6rem;
+    margin-top: 0.6rem;
+  }
+
+  .shot-thumb {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    background: var(--bg-card);
+    overflow: hidden;
+    border-radius: 3px;
+  }
+
+  .shot-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  .shot-remove {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 20px;
+    height: 20px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.6);
+    color: #fff;
+    font-size: 0.85rem;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s ease;
+  }
+
+  .shot-remove:hover { background: #e53e3e; }
 
 
 
