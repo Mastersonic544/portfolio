@@ -3,12 +3,15 @@
   import { collection, getDocs } from 'firebase/firestore';
   import { db } from '$lib/firebase.js';
   import { activeCategory, activeTag } from '$lib/stores/projects.js';
-  import { categoriesByType, categoriesFor } from '$lib/categories.js';
+  import { categoriesFor, loadCategories, DEFAULT_CATEGORIES } from '$lib/categories.js';
   import { logClick } from '$lib/utils/analytics.js';
   import ProjectCard from '$lib/components/public/ProjectCard.svelte';
   import ProjectExpand from '$lib/components/public/ProjectExpand.svelte';
 
-  const validCategories = new Set(Object.keys(categoriesByType));
+  const validCategories = new Set(['dev', 'digital', 'pfe']);
+
+  // Editable taxonomy (Firestore-backed); defaults render until it loads.
+  let taxonomy = $state(DEFAULT_CATEGORIES);
 
   /** @type {any[]} */
   let allProjects = $state([]);
@@ -29,7 +32,7 @@
   // Sub-category options for the second dropdown, narrowed to the categories
   // actually present on the loaded projects so we never show an empty filter.
   let currentCats = $derived(
-    categoriesFor(cat).filter((c) =>
+    categoriesFor(taxonomy, cat).filter((c) =>
       allProjects.some((p) => (cat ? p.category === cat : true) && (p.tags ?? []).includes(c))
     )
   );
@@ -72,6 +75,8 @@
 
   onMount(async () => {
     logClick('projects');
+
+    loadCategories().then((t) => { taxonomy = t; });
 
     const unsubCat = activeCategory.subscribe((v) => { cat = v; });
     const unsubTag = activeTag.subscribe((v)  => { tag = v; });

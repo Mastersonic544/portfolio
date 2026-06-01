@@ -4,7 +4,7 @@ export async function GET({ url }) {
   const body = [
     'User-agent: *',
     'Allow: /',
-    'Disallow: /shift-admin/',
+    'Disallow: /shift-admin',
     '',
     `Sitemap: ${origin}/sitemap.xml`
   ].join('\n');

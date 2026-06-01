@@ -3,11 +3,12 @@
   import { collection, getDocs, deleteDoc, doc, query, orderBy } from 'firebase/firestore';
   import { goto } from '$app/navigation';
   import { db } from '$lib/firebase.js';
-  import { categoriesFor } from '$lib/categories.js';
+  import { categoriesFor, loadCategories, DEFAULT_CATEGORIES } from '$lib/categories.js';
 
   /** @type {any[]} */
   let allProjects = $state([]);
   let loading     = $state(true);
+  let taxonomy    = $state(DEFAULT_CATEGORIES);
 
   let activeCategory = $state('');
   let activeTag      = $state('');
@@ -15,7 +16,7 @@
   /** @type {string | null} */
   let confirmDelete  = $state(null);
 
-  let currentTags = $derived(categoriesFor(activeCategory));
+  let currentTags = $derived(categoriesFor(taxonomy, activeCategory));
 
   let filtered = $derived(
     allProjects.filter((p) => {
@@ -26,6 +27,7 @@
   );
 
   onMount(async () => {
+    loadCategories().then((t) => { taxonomy = t; });
     try {
       const snap  = await getDocs(query(collection(db, 'projects'), orderBy('createdAt', 'desc')));
       allProjects = snap.docs.map((d) => ({ id: d.id, ...d.data() }));

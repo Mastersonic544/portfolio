@@ -1,10 +1,14 @@
 <script>
+  import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
   import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
   import { db } from '$lib/firebase.js';
   import { convertToWebP } from '$lib/utils/convertWebP.js';
   import { uploadToStorage } from '$lib/utils/uploadToStorage.js';
-  import { categoriesFor } from '$lib/categories.js';
+  import { categoriesFor, loadCategories, DEFAULT_CATEGORIES } from '$lib/categories.js';
+
+  let taxonomy = $state(DEFAULT_CATEGORIES);
+  onMount(async () => { taxonomy = await loadCategories(); });
 
   /* ── Wizard state ───────────────────────────── */
   let step        = $state(1);
@@ -154,7 +158,7 @@ My project: [DESCRIBE YOUR PROJECT HERE]`;
 
   // Checkbox options = taxonomy for the current type + any already-selected tags
   // (so AI-suggested or legacy custom tags still show and stay editable).
-  let catOptions = $derived([...new Set([...categoriesFor(category), ...tags])]);
+  let catOptions = $derived([...new Set([...categoriesFor(taxonomy, category), ...tags])]);
 
   /** @param {string} cat */
   function toggleCat(cat) {

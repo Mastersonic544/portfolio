@@ -6,7 +6,9 @@
   import { db } from '$lib/firebase.js';
   import { convertToWebP } from '$lib/utils/convertWebP.js';
   import { uploadToStorage } from '$lib/utils/uploadToStorage.js';
-  import { categoriesFor } from '$lib/categories.js';
+  import { categoriesFor, loadCategories, DEFAULT_CATEGORIES } from '$lib/categories.js';
+
+  let taxonomy = $state(DEFAULT_CATEGORIES);
 
   let loading   = $state(true);
   let notFound  = $state(false);
@@ -94,6 +96,7 @@
 
 
   onMount(async () => {
+    loadCategories().then((t) => { taxonomy = t; });
     const snap = await getDoc(doc(db, 'projects', $page.params.id));
     if (!snap.exists()) {
       notFound = true;
@@ -129,7 +132,7 @@
 
   // Checkbox options = taxonomy for the current type + any already-selected tags
   // (so legacy custom tags still show and stay editable).
-  let catOptions = $derived([...new Set([...categoriesFor(category), ...tags])]);
+  let catOptions = $derived([...new Set([...categoriesFor(taxonomy, category), ...tags])]);
 
   /** @param {string} cat */
   function toggleCat(cat) {
