@@ -5,14 +5,19 @@
   import { db } from '$lib/firebase.js';
   import { logClick } from '$lib/utils/analytics.js';
 
+  /** @type {{ items?: { q: string; a: string }[] }} */
+  let { items: initialItems = [] } = $props();
+
   /** @type {{ q: string; a: string }[]} */
-  let items  = $state([]);
-  let loaded = $state(false);
+  let items  = $state(initialItems);
+  let loaded = $state(initialItems.length > 0);
 
   let openIndex = $state(-1);
 
   onMount(async () => {
     logClick('faq');
+    // Items are normally server-rendered (good for SEO); only fetch if they weren't passed in.
+    if (items.length) return;
     try {
       const snap = await getDocs(
         query(collection(db, 'sections'), where('name', '==', 'faq'), limit(1))
@@ -43,11 +48,13 @@
   <div class="list">
     {#each items as item, i}
       <div class="item" class:open={openIndex === i}>
-        <button class="q" onclick={() => toggle(i)} aria-expanded={openIndex === i}>
-          <span class="q-num">Q.{(i + 1).toString().padStart(2, '0')}</span>
-          <span class="q-text">{item.q}</span>
-          <span class="q-toggle">+</span>
-        </button>
+        <h3 class="q-heading">
+          <button class="q" onclick={() => toggle(i)} aria-expanded={openIndex === i}>
+            <span class="q-num">Q.{(i + 1).toString().padStart(2, '0')}</span>
+            <span class="q-text">{item.q}</span>
+            <span class="q-toggle">+</span>
+          </button>
+        </h3>
 
         {#if openIndex === i}
           <div class="a" transition:slide={{ duration: 220 }}>
@@ -128,6 +135,12 @@
 
   .item {
     border-bottom: 1px solid var(--border);
+  }
+
+  .q-heading {
+    margin: 0;
+    font: inherit;
+    font-weight: inherit;
   }
 
   .q {

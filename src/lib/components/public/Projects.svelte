@@ -3,19 +3,12 @@
   import { collection, getDocs } from 'firebase/firestore';
   import { db } from '$lib/firebase.js';
   import { activeCategory, activeTag } from '$lib/stores/projects.js';
+  import { categoriesByType, categoriesFor } from '$lib/categories.js';
   import { logClick } from '$lib/utils/analytics.js';
   import ProjectCard from '$lib/components/public/ProjectCard.svelte';
   import ProjectExpand from '$lib/components/public/ProjectExpand.svelte';
 
-  /** @type {Record<string, string[]>} */
-  const tagsByCategory = {
-    '':      ['SvelteKit', 'React', 'Python', 'IoT', 'Video', 'Figma', 'Firebase', 'Arduino'],
-    digital: ['Video Editing', 'Graphic Design', 'Motion', 'Branding', 'Logo', 'After Effects'],
-    dev:     ['SvelteKit', 'React', 'Python', 'Node.js', 'IoT', 'Arduino', 'Firebase', 'ESP32'],
-    pfe:     ['PFE', 'Thesis', 'Reports', 'Academic', 'Machine Learning', 'Networks']
-  };
-
-  const validCategories = new Set(Object.keys(tagsByCategory).filter(Boolean));
+  const validCategories = new Set(Object.keys(categoriesByType));
 
   /** @type {any[]} */
   let allProjects = $state([]);
@@ -33,7 +26,13 @@
     })
   );
 
-  let currentTags = $derived(tagsByCategory[cat] ?? tagsByCategory['']);
+  // Sub-category options for the second dropdown, narrowed to the categories
+  // actually present on the loaded projects so we never show an empty filter.
+  let currentCats = $derived(
+    categoriesFor(cat).filter((c) =>
+      allProjects.some((p) => (cat ? p.category === cat : true) && (p.tags ?? []).includes(c))
+    )
+  );
 
   /** @type {HTMLElement | null} */
   let carouselEl = $state(null);
@@ -66,9 +65,9 @@
     activeTag.set('');
   }
 
-  /** @param {string} t */
-  function toggleTag(t) {
-    activeTag.update((v) => (v === t ? '' : t));
+  /** @param {Event & { currentTarget: HTMLSelectElement }} e */
+  function onTagChange(e) {
+    activeTag.set(e.currentTarget.value);
   }
 
   onMount(async () => {
@@ -108,7 +107,7 @@
   <div class="filters">
     <div class="select-wrap">
       <select class="category-select" value={cat} onchange={onCategoryChange}>
-        <option value="">All</option>
+        <option value="">All Types</option>
         <option value="digital">Digital</option>
         <option value="dev">Dev</option>
         <option value="pfe">Academic</option>
@@ -116,14 +115,14 @@
       <span class="select-arrow">▾</span>
     </div>
 
-    <div class="tag-row">
-      {#each currentTags as t}
-        <button
-          class="tag-btn"
-          class:active={tag === t}
-          onclick={() => toggleTag(t)}
-        >{t}</button>
-      {/each}
+    <div class="select-wrap">
+      <select class="category-select" value={tag} onchange={onTagChange} disabled={currentCats.length === 0}>
+        <option value="">All Categories</option>
+        {#each currentCats as c}
+          <option value={c}>{c}</option>
+        {/each}
+      </select>
+      <span class="select-arrow">▾</span>
     </div>
 
     <div class="search-wrap">
@@ -235,32 +234,10 @@
     color: var(--text-muted);
   }
 
-  /* Tags */
-  .tag-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-    flex: 1;
-  }
+  .category-select:disabled { opacity: 0.45; cursor: not-allowed; }
 
-  .tag-btn {
-    background: var(--bg-card);
-    color: var(--text-muted);
-    border: 1px solid transparent;
-    padding: 0.3rem 0.65rem;
-    border-radius: 4px;
-    font-family: var(--font-body);
-    font-size: 0.75rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: color 0.15s ease, background-color 0.15s ease;
-  }
-
-  .tag-btn:hover  { color: var(--text); }
-  .tag-btn.active { background: var(--accent); color: #fff; }
-
-  /* Search */
-  .search-wrap { flex-shrink: 0; }
+  /* Search — pushed to the right of the filter bar */
+  .search-wrap { flex-shrink: 0; margin-left: auto; }
 
   .search-input {
     background: transparent;

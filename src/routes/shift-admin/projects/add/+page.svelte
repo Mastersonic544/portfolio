@@ -4,6 +4,7 @@
   import { db } from '$lib/firebase.js';
   import { convertToWebP } from '$lib/utils/convertWebP.js';
   import { uploadToStorage } from '$lib/utils/uploadToStorage.js';
+  import { categoriesFor } from '$lib/categories.js';
 
   /* ── Wizard state ───────────────────────────── */
   let step        = $state(1);
@@ -13,7 +14,9 @@
   /* ── Form fields (Step 2) ───────────────────── */
   let title        = $state('');
   let category     = $state(/** @type {'dev' | 'digital' | 'pfe'} */ ('dev'));
-  let tagsStr      = $state('');
+  /** Selected categories (sub-tags), stored on the project's `tags` array */
+  let tags         = $state(/** @type {string[]} */ ([]));
+  let customCat    = $state('');
   let description  = $state('');
   let article      = $state('');
   let stackStr     = $state('');
@@ -65,7 +68,7 @@
         body: JSON.stringify({
           title: title.trim(),
           category,
-          tags: tagsStr,
+          tags: tags.join(', '),
           stack: stackStr,
           kpis,
           context: aiContext.trim()
@@ -135,7 +138,7 @@ My project: [DESCRIBE YOUR PROJECT HERE]`;
     }
     title       = parsed.title       ?? '';
     category    = parsed.category    ?? 'dev';
-    tagsStr     = (parsed.tags ?? []).join(', ');
+    tags        = Array.isArray(parsed.tags) ? parsed.tags.map((/** @type {any} */ t) => String(t).trim()).filter(Boolean) : [];
     description = parsed.description ?? '';
     article     = parsed.article     ?? '';
     stackStr    = (parsed.stack ?? []).join(', ');
@@ -147,6 +150,21 @@ My project: [DESCRIBE YOUR PROJECT HERE]`;
     documentLabel = parsed.documentLabel || 'View PDF';
     showcaseNote  = parsed.showcaseNote  ?? '';
     step        = 2;
+  }
+
+  // Checkbox options = taxonomy for the current type + any already-selected tags
+  // (so AI-suggested or legacy custom tags still show and stay editable).
+  let catOptions = $derived([...new Set([...categoriesFor(category), ...tags])]);
+
+  /** @param {string} cat */
+  function toggleCat(cat) {
+    tags = tags.includes(cat) ? tags.filter((t) => t !== cat) : [...tags, cat];
+  }
+
+  function addCustomCat() {
+    const v = customCat.trim();
+    if (v && !tags.includes(v)) tags = [...tags, v];
+    customCat = '';
   }
 
   function addKpi() { kpis = [...kpis, { label: '', value: '' }]; }
@@ -248,7 +266,7 @@ My project: [DESCRIBE YOUR PROJECT HERE]`;
         title:       title.trim(),
         slug,
         category,
-        tags:        tagsStr.split(',').map((t) => t.trim()).filter(Boolean),
+        tags:        tags,
         description: description.trim(),
         article:     article.trim(),
         stack:       category === 'digital' ? [] : stackStr.split(',').map((t) => t.trim()).filter(Boolean),
@@ -359,10 +377,27 @@ My project: [DESCRIBE YOUR PROJECT HERE]`;
         </select>
       </div>
 
-      <!-- Tags -->
+      <!-- Categories (sub-tags) — options change with the project type -->
       <div class="field full">
-        <label for="fld_i4be94">Tags <span class="field-hint">comma separated</span></label>
-        <input id="fld_i4be94" type="text" bind:value={tagsStr} placeholder="SvelteKit, Firebase, Node.js" />
+        <!-- svelte-ignore a11y_label_has_associated_control -->
+        <label>Categories <span class="field-hint">tick all that apply — drives the front-site filter</span></label>
+        <div class="cat-grid">
+          {#each catOptions as cat}
+            <label class="cat-chip" class:checked={tags.includes(cat)}>
+              <input type="checkbox" checked={tags.includes(cat)} onchange={() => toggleCat(cat)} />
+              <span>{cat}</span>
+            </label>
+          {/each}
+        </div>
+        <div class="cat-custom">
+          <input
+            type="text"
+            bind:value={customCat}
+            placeholder="Add a custom category…"
+            onkeydown={(e) => e.key === 'Enter' && (e.preventDefault(), addCustomCat())}
+          />
+          <button type="button" class="ghost-btn small" onclick={addCustomCat} disabled={!customCat.trim()}>+ Add</button>
+        </div>
       </div>
 
       <!-- AI Generator Tool -->
@@ -771,6 +806,50 @@ My project: [DESCRIBE YOUR PROJECT HERE]`;
 
   .field textarea { resize: vertical; line-height: 1.6; }
   .article-area   { min-height: 280px; }
+
+  /* Category picker */
+  .cat-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .cat-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: var(--bg-card);
+    border: 1px solid transparent;
+    color: var(--text-muted);
+    padding: 0.35rem 0.7rem;
+    border-radius: 4px;
+    font-family: var(--font-body);
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
+  }
+
+  .cat-chip:hover { color: var(--text); }
+
+  .cat-chip.checked {
+    color: #fff;
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .cat-chip input { display: none; }
+
+  .cat-custom {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    margin-top: 0.7rem;
+  }
+
+  .cat-custom input {
+    flex: 1;
+    border-bottom: 1px solid var(--bg-card);
+  }
 
   /* KPI editor */
   .kpi-list { display: flex; flex-direction: column; gap: 0.5rem; }

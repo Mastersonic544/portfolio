@@ -3,13 +3,7 @@
   import { collection, getDocs, deleteDoc, doc, query, orderBy } from 'firebase/firestore';
   import { goto } from '$app/navigation';
   import { db } from '$lib/firebase.js';
-
-  const tagsByCategory = {
-    '':      ['SvelteKit', 'React', 'Python', 'IoT', 'Video', 'Figma', 'Firebase', 'Arduino'],
-    digital: ['Video Editing', 'Graphic Design', 'Motion', 'Branding', 'Logo', 'After Effects'],
-    dev:     ['SvelteKit', 'React', 'Python', 'Node.js', 'IoT', 'Arduino', 'Firebase', 'ESP32'],
-    pfe:     ['PFE', 'Thesis', 'Reports', 'Academic', 'Machine Learning', 'Networks']
-  };
+  import { categoriesFor } from '$lib/categories.js';
 
   /** @type {any[]} */
   let allProjects = $state([]);
@@ -21,7 +15,7 @@
   /** @type {string | null} */
   let confirmDelete  = $state(null);
 
-  let currentTags = $derived(tagsByCategory[activeCategory] ?? tagsByCategory['']);
+  let currentTags = $derived(categoriesFor(activeCategory));
 
   let filtered = $derived(
     allProjects.filter((p) => {

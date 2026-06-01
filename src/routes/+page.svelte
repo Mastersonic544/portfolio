@@ -13,10 +13,12 @@
   import Footer from '$lib/components/public/Footer.svelte';
   import Chatbot from '$lib/components/public/Chatbot.svelte';
 
-  /** @type {{ data: { projects: { title: string; slug: string; description: string; category: string; status: string; thumbUrl: string; position: number }[] } }} */
+  /** @type {{ data: { projects: { title: string; slug: string; description: string; category: string; status: string; thumbUrl: string; position: number }[], faq: { q: string; a: string }[] } }} */
   let { data } = $props();
 
   const SITE_URL = 'https://yassinedhouib.dev';
+  // Used for schema dateModified. Bump when the site content meaningfully changes.
+  const LAST_UPDATED = '2026-05-31';
 
   const personSchema = {
     '@context': 'https://schema.org',
@@ -42,6 +44,8 @@
     name: 'Yassine Dhouib — Shift',
     url: SITE_URL,
     description: 'Portfolio of Yassine Dhouib (Shift), full stack developer and creative technologist based in Sfax, Tunisia.',
+    datePublished: '2025-06-01',
+    dateModified: LAST_UPDATED,
     author: { '@type': 'Person', name: 'Yassine Dhouib' }
   };
 
@@ -62,6 +66,24 @@
       }
     }))
   });
+
+  // FAQPage structured data — makes the Q&As eligible for FAQ rich results and
+  // guarantees Google sees them regardless of heading level or accordion state.
+  const faqSchema = $derived({
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: data.faq.map((item) => ({
+      '@type': 'Question',
+      name: item.q,
+      acceptedAnswer: { '@type': 'Answer', text: item.a }
+    }))
+  });
+
+  // Serializes a schema object to a JSON-LD string that is safe to embed in a
+  // script tag: every left-angle-bracket becomes its < JSON escape, so
+  // project text can't prematurely close the tag and truncate the JSON.
+  /** @param {object} obj */
+  const ldjson = (obj) => JSON.stringify(obj).replace(/</g, '\\u003c');
 </script>
 
 <svelte:head>
@@ -83,6 +105,7 @@
   <meta property="og:site_name"   content="Shift — Yassine Dhouib" />
 
   <meta name="twitter:card"        content="summary_large_image" />
+  <meta name="twitter:site"        content="@dho17830" />
   <meta name="twitter:title"       content="Shift — Yassine Dhouib | Developer, Designer, Teacher" />
   <meta name="twitter:description" content="Yassine Dhouib (Shift) — freelance full stack developer, UI/UX designer, and coding mentor based in Sfax, Tunisia. Available for remote work worldwide." />
   <meta name="twitter:image"       content="{SITE_URL}/images/og.webp" />
@@ -90,10 +113,17 @@
 
   <link rel="canonical" href="{SITE_URL}/" />
 
-  <script type="application/ld+json">{JSON.stringify(websiteSchema)}</script>
-  <script type="application/ld+json">{JSON.stringify(personSchema)}</script>
+  <!-- Single-language site: self-referencing hreflang + x-default -->
+  <link rel="alternate" hreflang="en"        href="{SITE_URL}/" />
+  <link rel="alternate" hreflang="x-default" href="{SITE_URL}/" />
+
+  {@html `<script type="application/ld+json">${ldjson(websiteSchema)}<\/script>`}
+  {@html `<script type="application/ld+json">${ldjson(personSchema)}<\/script>`}
   {#if data.projects.length > 0}
-    <script type="application/ld+json">{JSON.stringify(projectsSchema)}</script>
+    {@html `<script type="application/ld+json">${ldjson(projectsSchema)}<\/script>`}
+  {/if}
+  {#if data.faq.length > 0}
+    {@html `<script type="application/ld+json">${ldjson(faqSchema)}<\/script>`}
   {/if}
 </svelte:head>
 
@@ -106,6 +136,6 @@
 <CTA />
 <AvailabilityBanner />
 <Contact />
-<FAQ /><MiniCTA />
+<FAQ items={data.faq} /><MiniCTA />
 <Footer />
 <Chatbot />
