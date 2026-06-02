@@ -1,7 +1,7 @@
 <script>
   import { onMount } from 'svelte';
   import { tick } from 'svelte';
-  import { inView, animate } from 'motion';
+  import { inView } from 'motion';
   import { collection, getDocs, query, where, limit } from 'firebase/firestore';
   import { db } from '$lib/firebase.js';
   import { logClick } from '$lib/utils/analytics.js';
@@ -9,9 +9,31 @@
   /** @type {{ slug: string; date: string; caption: string; url?: string }[]} */
   let highlights = $state([]);
   let loaded     = $state(false);
+  let revealed   = $state(false);
+
+  // Which photo sits on top within each cluster (keyed by cluster index)
+  /** @type {Record<number, number>} */
+  let activeTop = $state({});
 
   /** @type {HTMLElement} */
   let sectionEl = $state();
+
+  // Group photos into clusters of 3 → e.g. 8 photos become [3, 3, 2].
+  // Auto-adapts as more moments are added via the CMS.
+  let clusters = $derived.by(() => {
+    /** @type {typeof highlights[]} */
+    const out = [];
+    for (let i = 0; i < highlights.length; i += 3) out.push(highlights.slice(i, i + 3));
+    return out;
+  });
+
+  /** @param {number} ci */
+  const topOf = (ci) => activeTop[ci] ?? 0;
+
+  /** Bring photo `j` to the front of cluster `ci`. @param {number} ci @param {number} j */
+  function bringToTop(ci, j) {
+    activeTop = { ...activeTop, [ci]: j };
+  }
 
   onMount(async () => {
     logClick('highlights');
@@ -25,15 +47,10 @@
     } catch (_) {}
     loaded = true;
 
-    // Wait for Svelte to flush DOM updates before wiring up animations
+    // Wait for Svelte to flush DOM updates before wiring up the reveal-on-scroll
     await tick();
     if (!sectionEl) return;
-    const polaroids = sectionEl.querySelectorAll('.polaroid');
-    polaroids.forEach((el, i) => {
-      inView(el, () => {
-        animate(el, { opacity: [0, 1], y: [36, 0] }, { duration: 0.55, delay: i * 0.12, easing: [0.22, 1, 0.36, 1] });
-      }, { amount: 0.2 });
-    });
+    inView(sectionEl, () => { revealed = true; }, { amount: 0.15 });
   });
 </script>
 
@@ -41,20 +58,33 @@
 <section class="highlights" id="highlights" bind:this={sectionEl}>
   <h2 class="section-title">Moments</h2>
 
-  <div class="grid">
-    {#each highlights as item, i}
-      <!-- Alternating angles of rotation, styled exactly as portfolio.html -->
-      <div class="polaroid-outer" style="--rot: {i % 3 === 0 ? '-4deg' : i % 3 === 1 ? '3deg' : '-1.5deg'}">
-        <div class="polaroid">
-          <div class="photo">
-            <img src={item.url || `/images/highlights/${item.slug}.webp`} alt={item.caption} loading="lazy"
-              onerror={(e) => { e.currentTarget.style.display = 'none'; }} />
-          </div>
-          <div class="cap">
-            {item.caption}
-            <span class="cap-date">{item.date}</span>
-          </div>
-        </div>
+  <p class="hint">Tap a photo to bring it to the front</p>
+
+  <div class="clusters" class:in={revealed}>
+    {#each clusters as cluster, ci}
+      <div class="cluster">
+        {#each cluster as item, j}
+          <!-- Each photo in the stack; clicking animates it to the top -->
+          <button
+            type="button"
+            class="polaroid-outer"
+            class:active={topOf(ci) === j}
+            style="--i: {j}; --rot: {j % 3 === 0 ? '-5deg' : j % 3 === 1 ? '4deg' : '-2deg'}; z-index: {topOf(ci) === j ? 50 : 10 - j};"
+            onclick={() => bringToTop(ci, j)}
+            aria-label={`Bring "${item.caption}" to the front`}
+          >
+            <div class="polaroid">
+              <div class="photo">
+                <img src={item.url || `/images/highlights/${item.slug}.webp`} alt={item.caption} loading="lazy"
+                  onerror={(e) => { e.currentTarget.style.display = 'none'; }} />
+              </div>
+              <div class="cap">
+                {item.caption}
+                <span class="cap-date">{item.date}</span>
+              </div>
+            </div>
+          </button>
+        {/each}
       </div>
     {/each}
   </div>
@@ -79,22 +109,50 @@
     margin-bottom: 3rem;
   }
 
-  .grid {
-    display: grid;
-    /* auto-fill: adapts to any item count added via CMS */
-    grid-template-columns: repeat(auto-fill, minmax(min(270px, 100%), 1fr));
-    gap: 2.5rem;
-    align-items: start;
+  .hint {
+    font-family: var(--font-body);
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    letter-spacing: 0.04em;
+    margin: -2rem 0 3.5rem;
+  }
+
+  /* Clusters of stacked polaroids, laid out in a wrapping row */
+  .clusters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6rem 5rem;
+    justify-content: center;
+    align-items: flex-start;
+  }
+
+  .cluster {
+    position: relative;
+    width: 240px;
+    height: 360px;
+    flex-shrink: 0;
   }
 
   .polaroid-outer {
-    transform: rotate(var(--rot));
-    transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
-    position: relative;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 220px;
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: pointer;
+    /* Fan the stack out by index; clicking the active one lifts it forward */
+    transform: rotate(var(--rot)) translate(calc(var(--i) * 16px), calc(var(--i) * 12px));
+    transform-origin: center bottom;
+    opacity: 0;
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.55s ease;
   }
-  .polaroid-outer:hover {
-    transform: rotate(0deg) translateY(-6px) scale(1.03);
-    z-index: 5;
+
+  .clusters.in .polaroid-outer { opacity: 1; }
+
+  .polaroid-outer.active {
+    transform: rotate(0deg) translateY(-16px) scale(1.04);
   }
 
   .polaroid {
@@ -102,7 +160,6 @@
     padding: 12px 12px 28px;
     border-radius: 2px;
     box-shadow: 0 2px 12px rgba(0,0,0,0.10), 0 8px 24px rgba(0,0,0,0.06);
-    opacity: 0; /* Animated into view */
     transition: background 0.4s ease;
   }
 
@@ -153,10 +210,13 @@
 
   @media (max-width: 900px) {
     .highlights { padding: 5rem 24px 3rem; }
+    .clusters { gap: 5rem 3rem; }
   }
   @media (max-width: 480px) {
     .highlights { padding: 4rem 16px 2.5rem; }
-    /* Single-column on phones; cards fill full width */
-    .grid { grid-template-columns: 1fr; }
+    /* Clusters stack vertically and shrink to fit narrow screens */
+    .clusters { gap: 4.5rem 3rem; }
+    .cluster { width: 210px; height: 330px; }
+    .polaroid-outer { width: 190px; }
   }
 </style>

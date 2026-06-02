@@ -16,6 +16,14 @@
   /** @type {HTMLElement | null} */
   let modalEl = $state(null);
 
+  // In-page screenshot lightbox (no redirect / new tab)
+  /** @type {{ src: string, alt: string } | null} */
+  let lightbox = $state(null);
+
+  /** @param {string} src @param {string} alt */
+  function openLightbox(src, alt) { lightbox = { src, alt }; }
+  function closeLightbox() { lightbox = null; }
+
   // Resolves the external showcase link for digital (Behance) and academic (document) work
   let showcase = $derived.by(() => {
     if (!project) return null;
@@ -47,11 +55,15 @@
     return () => { document.body.style.overflow = ''; };
   });
 
-  // Close on Escape key
+  // Close on Escape key — the lightbox takes priority over the modal
   $effect(() => {
     if (!open) return;
     /** @param {KeyboardEvent} e */
-    const handler = (e) => { if (e.key === 'Escape') onclose?.(); };
+    const handler = (e) => {
+      if (e.key !== 'Escape') return;
+      if (lightbox) closeLightbox();
+      else onclose?.();
+    };
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
   });
@@ -158,9 +170,14 @@
         {#if project.screenshots?.length}
           <div class="screenshots">
             {#each project.screenshots as shot, i}
-              <a class="shot" href={shot} target="_blank" rel="noopener noreferrer">
+              <button
+                type="button"
+                class="shot"
+                onclick={() => openLightbox(shot, `${project.title} screenshot ${i + 1}`)}
+                aria-label={`View screenshot ${i + 1} full size`}
+              >
                 <img src={shot} alt={`${project.title} screenshot ${i + 1}`} loading="lazy" />
-              </a>
+              </button>
             {/each}
           </div>
         {/if}
@@ -175,6 +192,22 @@
       </div>
     </div>
   </div>
+
+  <!-- Screenshot lightbox -->
+  {#if lightbox}
+    <div
+      class="lightbox"
+      onclick={closeLightbox}
+      onkeydown={(e) => e.key === 'Escape' && closeLightbox()}
+      role="dialog"
+      aria-modal="true"
+      aria-label={lightbox.alt}
+      tabindex="-1"
+    >
+      <button class="lightbox-close" onclick={closeLightbox} aria-label="Close image">✕</button>
+      <img src={lightbox.src} alt={lightbox.alt} />
+    </div>
+  {/if}
 {/if}
 
 <style>
@@ -458,6 +491,9 @@
     border: 1px solid var(--bg-card);
     border-radius: 4px;
     aspect-ratio: 16 / 9;
+    padding: 0;
+    background: none;
+    cursor: zoom-in;
   }
 
   .shot img {
@@ -469,6 +505,45 @@
   }
 
   .shot:hover img { transform: scale(1.04); }
+
+  /* ── Screenshot lightbox ─────────────────────── */
+  .lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 500;
+    background: rgba(0, 0, 0, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    cursor: zoom-out;
+    animation: backdrop-in 0.2s ease both;
+  }
+
+  .lightbox img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    display: block;
+  }
+
+  .lightbox-close {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 1;
+    background: rgba(0, 0, 0, 0.45);
+    border: none;
+    color: #fff;
+    font-size: 1rem;
+    line-height: 1;
+    padding: 0.4rem 0.55rem;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: background 0.15s ease;
+  }
+
+  .lightbox-close:hover { background: rgba(0, 0, 0, 0.8); }
 
   /* ── Article markdown ────────────────────────── */
   .article {

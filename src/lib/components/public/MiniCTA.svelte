@@ -28,7 +28,7 @@
     margin: 0 auto;
     display: flex;
     align-items: center;
-    justify-content: flex-end;
+    justify-content: center;
     gap: 0.75rem;
   }
 
@@ -62,7 +62,7 @@
 
   .arr { font-size: 0.75rem; }
 
-  @media (max-width: 480px) {
+  @media (max-width: 600px) {
     .mini-inner { justify-content: stretch; }
     .mini-btn { flex: 1; justify-content: center; }
   }

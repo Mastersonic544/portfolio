@@ -129,13 +129,13 @@
 
 <Hero />
 <About /><MiniCTA />
-<Services /><MiniCTA />
-<Projects /><MiniCTA />
+<Services />
+<Projects />
 <Highlights /><MiniCTA />
-<Teaching /><MiniCTA />
+<Teaching />
 <CTA />
 <AvailabilityBanner />
 <Contact />
-<FAQ items={data.faq} /><MiniCTA />
+<FAQ items={data.faq} />
 <Footer />
 <Chatbot />

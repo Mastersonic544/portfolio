@@ -53,13 +53,20 @@
   function handleOpen(project) {
     selectedProject = project;
     expandOpen = true;
-    window.location.hash = project.slug;
+    // Push a history entry so the browser/mobile back button closes the modal.
+    history.pushState({ projectModal: project.slug }, '', '#' + project.slug);
   }
 
-  function handleClose() {
+  function closeModal() {
     expandOpen = false;
     selectedProject = null;
-    history.pushState('', '', window.location.pathname + window.location.search);
+  }
+
+  // X button / backdrop / Escape: step back through history so the URL stays
+  // in sync and a subsequent back press behaves normally. popstate then closes.
+  function handleClose() {
+    if (history.state?.projectModal) history.back();
+    else closeModal();
   }
 
   /** @param {Event & { currentTarget: HTMLSelectElement }} e */
@@ -81,6 +88,10 @@
     const unsubCat = activeCategory.subscribe((v) => { cat = v; });
     const unsubTag = activeTag.subscribe((v)  => { tag = v; });
 
+    // Back/forward navigation closes the open project modal (mobile back button).
+    const onPopState = () => { if (expandOpen) closeModal(); };
+    window.addEventListener('popstate', onPopState);
+
     // Pre-apply ?category= query param
     const params = new URLSearchParams(window.location.search);
     const qCat   = params.get('category');
@@ -97,10 +108,15 @@
     const hash = window.location.hash.slice(1);
     if (hash) {
       const match = allProjects.find((p) => p.slug === hash);
-      if (match) { selectedProject = match; expandOpen = true; }
+      if (match) {
+        selectedProject = match;
+        expandOpen = true;
+        // Add a history entry so the back button closes the deep-linked modal.
+        history.pushState({ projectModal: match.slug }, '', '#' + match.slug);
+      }
     }
 
-    return () => { unsubCat(); unsubTag(); };
+    return () => { unsubCat(); unsubTag(); window.removeEventListener('popstate', onPopState); };
   });
 </script>
 

@@ -2,7 +2,7 @@
   import { onMount } from 'svelte';
   import { tick } from 'svelte';
   import gsap from 'gsap';
-  import { collection, getDocs, query, where, limit } from 'firebase/firestore';
+  import { collection, getDocs, getCountFromServer, query, where, limit } from 'firebase/firestore';
   import { db } from '$lib/firebase.js';
   import { theme } from '$lib/stores/theme.js';
   import { logClick } from '$lib/utils/analytics.js';
@@ -98,6 +98,13 @@
     );
     observer.observe(heroEl);
 
+    // Browsers ignore navigator.vibrate() until the user has interacted with the
+    // page (sticky activation). Prime it on the first interaction anywhere so the
+    // typewriter haptics kick in reliably — no need to toggle the theme to wake them.
+    const primeHaptics = () => { try { navigator.vibrate?.(0); } catch (_) { /* unsupported */ } };
+    window.addEventListener('pointerdown', primeHaptics, { once: true });
+    window.addEventListener('touchstart',  primeHaptics, { once: true, passive: true });
+
     // Physical Shift key (standalone press, no other modifier) → toggle theme
     let shiftOnly = false;
     function onKeydown(/** @type {KeyboardEvent} */ e) {
@@ -133,6 +140,14 @@
         }
       }
     } catch (_) { /* silent */ }
+
+    // Replace the "Projects" KPI number with the live count from Firestore,
+    // so the stat always reflects the real number of logged projects.
+    try {
+      const countSnap = await getCountFromServer(collection(db, 'projects'));
+      const total = countSnap.data().count;
+      kpis = kpis.map((k) => (/project/i.test(k.label) ? { ...k, num: total } : k));
+    } catch (_) { /* keep the CMS value if the count fails */ }
 
     loaded = true;
     await tick();

@@ -49,6 +49,7 @@
   /** @type {string[]} */
   let screenshots = $state([]);
   let shotStatus  = $state(/** @type {'idle'|'working'|'error'} */ ('idle'));
+  let shotError   = $state('');
 
   /* ── AI Article Generator ────────────────── */
   let aiContext    = $state('');
@@ -168,16 +169,20 @@
       thumbUrl         = await uploadToStorage(blob, 'projects', `${slug}-thumb.webp`);
       existingThumbUrl = thumbUrl;
       uploadStatus     = 'done';
-    } catch {
+    } catch (err) {
+      console.error('[thumbnail upload] failed:', err);
       uploadStatus = 'error';
     }
   }
 
   /** Converts & uploads one or more screenshots, appending each CDN URL to the gallery */
   async function handleScreenshotUpload(/** @type {Event & { currentTarget: HTMLInputElement }} */ e) {
-    const files = e.currentTarget.files;
+    // Capture the input element now — after an `await`, e.currentTarget is null.
+    const input = e.currentTarget;
+    const files = input.files;
     if (!files?.length) return;
     shotStatus = 'working';
+    shotError  = '';
     try {
       const baseSlug = slug || 'project';
       for (const file of Array.from(files)) {
@@ -187,8 +192,10 @@
         screenshots = [...screenshots, url];
       }
       shotStatus = 'idle';
-      e.currentTarget.value = '';
-    } catch {
+      input.value = '';
+    } catch (err) {
+      console.error('[screenshot upload] failed:', err);
+      shotError  = err instanceof Error ? err.message : String(err);
       shotStatus = 'error';
     }
   }
@@ -244,7 +251,8 @@
         updatedAt:   serverTimestamp()
       });
       goto('/shift-admin/projects');
-    } catch {
+    } catch (err) {
+      console.error('[save project] failed:', err);
       saveError = 'Failed to save. Check your connection.';
       saving = false;
     }
@@ -517,7 +525,7 @@
           {#if shotStatus === 'working'}
             <p class="upload-status">Converting &amp; uploading…</p>
           {:else if shotStatus === 'error'}
-            <p class="upload-status error">Upload failed — try again.</p>
+            <p class="upload-status error">Upload failed — {shotError || 'try again.'}</p>
           {/if}
           {#if screenshots.length}
             <div class="shots-grid">
