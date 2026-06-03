@@ -84,7 +84,7 @@ export async function POST({ request }) {
       'X-Title': 'Shift Portfolio'
     },
     body: JSON.stringify({
-      model: 'openrouter/auto',
+      model: 'meta-llama/llama-3.3-70b-instruct:free',
       messages: [
         { role: 'system', content: SYSTEM_PROMPT },
         { role: 'user',   content: message }
