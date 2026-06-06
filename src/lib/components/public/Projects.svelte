@@ -22,9 +22,13 @@
 
   let filtered = $derived(
     allProjects.filter((p) => {
-      const catOk    = !cat || p.category === cat;
-      const tagOk    = !tag || (p.tags ?? []).includes(tag);
-      const searchOk = !search.trim() || p.title?.toLowerCase().includes(search.trim().toLowerCase());
+      const catOk = !cat || p.category === cat;
+      const tagOk = !tag || (p.tags ?? []).includes(tag);
+      const q     = search.trim().toLowerCase();
+      const searchOk =
+        !q ||
+        p.title?.toLowerCase().includes(q) ||
+        (p.tags ?? []).some((t) => t.toLowerCase().includes(q));
       return catOk && tagOk && searchOk && p.published !== false;
     })
   );
@@ -150,7 +154,7 @@
       <input
         class="search-input"
         type="search"
-        placeholder="Search projects…"
+        placeholder="Search projects or tags…"
         bind:value={search}
       />
     </div>

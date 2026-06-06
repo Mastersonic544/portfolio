@@ -12,9 +12,18 @@
 
   let activeCategory = $state('');
   let activeTag      = $state('');
+  let search         = $state('');
 
   /** @type {string | null} */
   let confirmDelete  = $state(null);
+
+  // ── Export modal state ──────────────────────────
+  let exportOpen   = $state(false);
+  let exportJson   = $state('');
+  let enriching    = $state(false);
+  /** @type {string | null} */
+  let exportError  = $state(null);
+  let copied       = $state(false);
 
   let currentTags = $derived(categoriesFor(taxonomy, activeCategory));
 
@@ -22,9 +31,85 @@
     allProjects.filter((p) => {
       const catOk = !activeCategory || p.category === activeCategory;
       const tagOk = !activeTag      || p.tags?.includes(activeTag);
-      return catOk && tagOk;
+      const q     = search.trim().toLowerCase();
+      const searchOk =
+        !q ||
+        p.title?.toLowerCase().includes(q) ||
+        (p.tags ?? []).some((t) => t.toLowerCase().includes(q));
+      return catOk && tagOk && searchOk;
     })
   );
+
+  // Maps an internal project record to the requested export schema.
+  /** @param {any} p */
+  function toExportSchema(p) {
+    const stack = Array.isArray(p.stack) && p.stack.length ? p.stack
+                : Array.isArray(p.tags)  && p.tags.length  ? p.tags
+                : null;
+    const outcome = Array.isArray(p.kpis) && p.kpis.length
+      ? p.kpis.map((/** @type {any} */ k) => `${k.label}: ${k.value}`).join(', ')
+      : null;
+    const url = p.links && typeof p.links === 'object'
+      ? (Object.values(p.links).find((v) => !!v) ?? null)
+      : null;
+    return {
+      id: null,
+      name: p.title ?? null,
+      description: p.description || null,
+      type: null,
+      technologies: null,
+      tech_stack: stack,
+      role: null,
+      status: p.status || null,
+      outcome,
+      url
+    };
+  }
+
+  function buildExportJson() {
+    const projects = filtered.map(toExportSchema);
+    return JSON.stringify({ projects }, null, 2);
+  }
+
+  function openExport() {
+    exportError = null;
+    copied = false;
+    exportJson = buildExportJson();
+    exportOpen = true;
+  }
+
+  function closeExport() {
+    exportOpen = false;
+  }
+
+  async function copyExport() {
+    try {
+      await navigator.clipboard.writeText(exportJson);
+      copied = true;
+      setTimeout(() => (copied = false), 1800);
+    } catch (_) { /* clipboard blocked */ }
+  }
+
+  // Ask OpenRouter to fill in the null/blank fields with realistic data.
+  async function enrichWithAI() {
+    enriching = true;
+    exportError = null;
+    try {
+      const projects = JSON.parse(exportJson).projects;
+      const res = await fetch('/api/enrich-projects', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ projects })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to enrich projects');
+      exportJson = JSON.stringify({ projects: data.projects }, null, 2);
+    } catch (err) {
+      exportError = err instanceof Error ? err.message : 'Something went wrong';
+    } finally {
+      enriching = false;
+    }
+  }
 
   onMount(async () => {
     loadCategories().then((t) => { taxonomy = t; });
@@ -63,6 +148,7 @@
   <div class="page-header">
     <h1 class="page-title">Projects</h1>
     <div class="header-actions">
+      <button class="seed-link" type="button" onclick={openExport}>Export All</button>
       <a class="seed-link" href="/shift-admin/projects/seed">Bulk Import</a>
       <a class="add-btn" href="/shift-admin/projects/add">+ Add Project</a>
     </div>
@@ -93,6 +179,13 @@
         >{tag}</button>
       {/each}
     </div>
+
+    <input
+      class="search-input"
+      type="search"
+      placeholder="Search title or tags…"
+      bind:value={search}
+    />
   </div>
 
   <!-- Project list -->
@@ -147,6 +240,43 @@
 
 </div>
 
+<!-- ── Export modal ─────────────────────────────── -->
+{#if exportOpen}
+  <div
+    class="modal-backdrop"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Export projects"
+    tabindex="-1"
+    onclick={closeExport}
+    onkeydown={(e) => e.key === 'Escape' && closeExport()}
+  >
+    <div class="modal" role="presentation" onclick={(e) => e.stopPropagation()}>
+      <div class="modal-header">
+        <h2 class="modal-title">Export Projects ({filtered.length})</h2>
+        <button class="modal-close" type="button" onclick={closeExport} aria-label="Close">×</button>
+      </div>
+
+      <p class="modal-sub">JSON of {filtered.length} project{filtered.length !== 1 ? 's' : ''} matching the current filters. Use the AI button to fill in any blank fields.</p>
+
+      {#if exportError}
+        <p class="modal-error">{exportError}</p>
+      {/if}
+
+      <textarea class="modal-json" readonly bind:value={exportJson} spellcheck="false"></textarea>
+
+      <div class="modal-actions">
+        <button class="m-btn ai" type="button" onclick={enrichWithAI} disabled={enriching}>
+          {enriching ? 'Filling blanks…' : '✨ Fill blanks with AI'}
+        </button>
+        <button class="m-btn copy" type="button" onclick={copyExport}>
+          {copied ? '✓ Copied' : 'Copy JSON'}
+        </button>
+      </div>
+    </div>
+  </div>
+{/if}
+
 <style>
   .projects-page { display: flex; flex-direction: column; gap: 1.75rem; }
 
@@ -185,6 +315,9 @@
   }
 
   .seed-link:hover { color: var(--text); border-color: var(--text); }
+
+  /* Button variant of .seed-link (Export All) */
+  button.seed-link { cursor: pointer; line-height: 1.2; }
 
   .add-btn {
     background: var(--accent);
@@ -251,6 +384,137 @@
 
   .tag-btn:hover  { color: var(--text); }
   .tag-btn.active { background: var(--accent); color: #fff; }
+
+  .search-input {
+    margin-left: auto;
+    background: transparent;
+    border: 1px solid var(--bg-card);
+    color: var(--text);
+    padding: 0.45rem 0.75rem;
+    font-family: var(--font-body);
+    font-size: 0.8rem;
+    outline: none;
+    width: 220px;
+    transition: border-color 0.2s ease;
+  }
+
+  .search-input:focus { border-color: var(--accent); }
+  .search-input::placeholder { color: var(--text-muted); opacity: 0.6; }
+  .search-input::-webkit-search-cancel-button { display: none; }
+
+  /* ── Export modal ───────────────────────────── */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    z-index: 1000;
+  }
+
+  .modal {
+    background: var(--bg);
+    border: 1px solid var(--bg-card);
+    width: 100%;
+    max-width: 640px;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    gap: 0.875rem;
+    padding: 1.5rem;
+  }
+
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .modal-title {
+    font-family: var(--font-heading);
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--text);
+  }
+
+  .modal-close {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0 0.25rem;
+  }
+
+  .modal-close:hover { color: var(--text); }
+
+  .modal-sub {
+    font-family: var(--font-body);
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+  }
+
+  .modal-error {
+    font-family: var(--font-body);
+    font-size: 0.78rem;
+    color: #e53e3e;
+    border: 1px solid #e53e3e;
+    padding: 0.5rem 0.7rem;
+  }
+
+  .modal-json {
+    flex: 1;
+    min-height: 260px;
+    resize: vertical;
+    background: var(--bg-card);
+    border: 1px solid var(--bg-card);
+    color: var(--text);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.72rem;
+    line-height: 1.5;
+    padding: 0.875rem;
+    outline: none;
+    white-space: pre;
+    overflow: auto;
+  }
+
+  .modal-actions {
+    display: flex;
+    gap: 0.625rem;
+    justify-content: flex-end;
+  }
+
+  .m-btn {
+    font-family: var(--font-body);
+    font-size: 0.82rem;
+    font-weight: 600;
+    padding: 0.55rem 1.1rem;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: opacity 0.2s ease, color 0.15s ease, border-color 0.15s ease;
+  }
+
+  .m-btn.ai {
+    background: transparent;
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .m-btn.ai:hover:not(:disabled) { background: var(--accent); color: #fff; }
+  .m-btn.ai:disabled { opacity: 0.55; cursor: wait; }
+
+  .m-btn.copy {
+    background: var(--accent);
+    color: #fff;
+  }
+
+  .m-btn.copy:hover { opacity: 0.88; }
 
   /* ── Project list ───────────────────────────── */
   .project-list { display: flex; flex-direction: column; }
