@@ -4,7 +4,7 @@
   import { db } from '$lib/firebase.js';
   import {
     Code, PaintBrush, Stack, DeviceMobile, ChartBar,
-    GraduationCap, Briefcase, FileText
+    GraduationCap, Briefcase, FileText, FilmSlate
   } from 'phosphor-svelte';
 
   /** @type {Record<string, any>} */
@@ -14,6 +14,7 @@
     fullstack: Stack,
     mobile:    DeviceMobile,
     data:      ChartBar,
+    video:     FilmSlate,
     academic:  GraduationCap,
     business:  Briefcase,
     general:   FileText,

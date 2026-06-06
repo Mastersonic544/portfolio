@@ -4,7 +4,7 @@
   import { db } from '$lib/firebase.js';
   import {
     Code, PaintBrush, Stack, DeviceMobile, ChartBar,
-    GraduationCap, Briefcase, FileText
+    GraduationCap, Briefcase, FileText, FilmSlate
   } from 'phosphor-svelte';
 
   const ICONS = [
@@ -13,6 +13,7 @@
     { id: 'fullstack', label: 'Full Stack',    Icon: Stack },
     { id: 'mobile',    label: 'Mobile',        Icon: DeviceMobile },
     { id: 'data',      label: 'Data / AI',     Icon: ChartBar },
+    { id: 'video',     label: 'Video Editing', Icon: FilmSlate },
     { id: 'academic',  label: 'Academic',      Icon: GraduationCap },
     { id: 'business',  label: 'Business',      Icon: Briefcase },
     { id: 'general',   label: 'General',       Icon: FileText },
@@ -35,7 +36,34 @@
   let uploading   = $state(false);
   let uploadError = $state('');
 
+  // Resume upload state
+  /** @type {File | null} */
+  let resumeFile      = $state(null);
+  let resumeUploading = $state(false);
+  let resumeError     = $state('');
+
   const docRef = doc(db, 'settings', 'cvs');
+
+  // Uploads a raw file to Cloudinary and returns its secure URL.
+  /** @param {File} file @param {string} slug */
+  async function uploadToCloudinary(file, slug) {
+    const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+    const preset    = import.meta.env.VITE_CLOUDINARY_PRESET;
+    const form = new FormData();
+    form.append('file', file);
+    form.append('upload_preset', preset);
+    form.append('public_id', `shift/cvs/${slug}`);
+    const res = await fetch(
+      `https://api.cloudinary.com/v1_1/${cloudName}/raw/upload`,
+      { method: 'POST', body: form }
+    );
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error?.message ?? `Upload failed (${res.status})`);
+    }
+    const data = await res.json();
+    return data.secure_url;
+  }
 
   onMount(async () => {
     try {
@@ -65,23 +93,9 @@
     uploading   = true;
     uploadError = '';
     try {
-      const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
-      const preset    = import.meta.env.VITE_CLOUDINARY_PRESET;
       const slug = `${Date.now()}-${newLabel.trim().toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}`;
-      const form = new FormData();
-      form.append('file', newFile);
-      form.append('upload_preset', preset);
-      form.append('public_id', `shift/cvs/${slug}`);
-      const res = await fetch(
-        `https://api.cloudinary.com/v1_1/${cloudName}/raw/upload`,
-        { method: 'POST', body: form }
-      );
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.error?.message ?? `Upload failed (${res.status})`);
-      }
-      const data = await res.json();
-      cvs = [...cvs, { label: newLabel.trim(), icon: newIcon, url: data.secure_url }];
+      const url  = await uploadToCloudinary(newFile, slug);
+      cvs = [...cvs, { label: newLabel.trim(), icon: newIcon, url }];
       newLabel = '';
       newFile  = null;
       newIcon  = 'general';
@@ -93,9 +107,37 @@
     }
   }
 
+  // Upload a resume PDF — sets resumeUrl to the hosted file (alternative to a link).
+  async function uploadResume() {
+    if (!resumeFile) return;
+    resumeUploading = true;
+    resumeError     = '';
+    try {
+      const url  = await uploadToCloudinary(resumeFile, `resume-${Date.now()}`);
+      resumeUrl  = url;
+      resumeFile = null;
+      await persist();
+    } catch (/** @type {any} */ err) {
+      resumeError = err.message;
+    } finally {
+      resumeUploading = false;
+    }
+  }
+
   /** @param {number} i */
   function removeCv(i) {
     cvs = cvs.filter((_, j) => j !== i);
+    persist();
+  }
+
+  // Reorder a CV in the list; the public popup renders in this same order.
+  /** @param {number} i @param {number} dir -1 = up, +1 = down */
+  function moveCv(i, dir) {
+    const j = i + dir;
+    if (j < 0 || j >= cvs.length) return;
+    const next = [...cvs];
+    [next[i], next[j]] = [next[j], next[i]];
+    cvs = next;
     persist();
   }
 </script>
@@ -132,6 +174,22 @@
           <span class="cv-row-label">{cv.label}</span>
           <span class="cv-row-type">{ic.label}</span>
           <a class="cv-row-link" href={cv.url} target="_blank" rel="noopener noreferrer">Preview ↗</a>
+          <div class="move-group">
+            <button
+              class="move-btn"
+              onclick={() => moveCv(i, -1)}
+              disabled={i === 0}
+              aria-label="Move up"
+              title="Move up"
+            >↑</button>
+            <button
+              class="move-btn"
+              onclick={() => moveCv(i, 1)}
+              disabled={i === cvs.length - 1}
+              aria-label="Move down"
+              title="Move down"
+            >↓</button>
+          </div>
           <button class="del-btn" onclick={() => removeCv(i)} aria-label="Remove">×</button>
         </div>
       {/each}
@@ -197,22 +255,56 @@
       </div>
     </div>
 
-    <!-- ── Resume link ───────────────────────────── -->
+    <!-- ── Resume ────────────────────────────────── -->
     <div class="resume-section">
-      <h2 class="section-label">Resume Link</h2>
+      <h2 class="section-label">Resume</h2>
       <p class="desc" style="margin:0">
-        Paste a link to your online resume (Google Docs, Notion, etc.). Shows as "Read Resume" at the bottom of the popup.
+        Upload a resume PDF, or paste a link to an online resume (Google Docs, Notion, etc.).
+        Shows as "Read Resume" at the bottom of the popup.
       </p>
-      <div class="resume-row">
-        <input
-          class="text-input"
-          type="url"
-          placeholder="https://docs.google.com/…"
-          bind:value={resumeUrl}
-        />
-        <button class="action-btn" onclick={persist} disabled={saving} style="align-self:flex-end">
-          {saving ? 'Saving…' : 'Save'}
-        </button>
+
+      {#if resumeUrl}
+        <a class="cv-row-link" href={resumeUrl} target="_blank" rel="noopener noreferrer" style="align-self:flex-start">
+          Current resume: Preview ↗
+        </a>
+      {/if}
+
+      <!-- Upload a resume file -->
+      <div class="field">
+        <span class="field-label">Upload PDF</span>
+        <div class="resume-row">
+          <label class="file-pick">
+            <input
+              type="file"
+              accept=".pdf,application/pdf"
+              class="file-hidden"
+              onchange={(e) => { resumeFile = e.currentTarget.files?.[0] ?? null; resumeError = ''; }}
+            />
+            <span class="file-btn" class:has-file={!!resumeFile}>
+              {resumeFile ? '✓ ' + resumeFile.name : 'Choose PDF…'}
+            </span>
+          </label>
+          <button class="action-btn" onclick={uploadResume} disabled={!resumeFile || resumeUploading}>
+            {resumeUploading ? 'Uploading…' : 'Upload & Save'}
+          </button>
+        </div>
+        {#if resumeError}<p class="error-msg">{resumeError}</p>{/if}
+      </div>
+
+      <!-- Or paste a link -->
+      <div class="field">
+        <span class="field-label">Or paste a link</span>
+        <div class="resume-row">
+          <input
+            class="text-input"
+            type="url"
+            placeholder="https://docs.google.com/…"
+            bind:value={resumeUrl}
+          />
+          <button class="action-btn" onclick={persist} disabled={saving} style="align-self:flex-end">
+            {saving ? 'Saving…' : 'Save'}
+          </button>
+        </div>
       </div>
     </div>
 
@@ -243,12 +335,31 @@
 
   .cv-row {
     display: grid;
-    grid-template-columns: 32px 1fr auto auto auto;
+    grid-template-columns: 32px 1fr auto auto auto auto;
     align-items: center;
     gap: 0.75rem;
     padding: 0.625rem 0;
     border-bottom: 1px solid var(--bg-card);
   }
+
+  .move-group { display: flex; gap: 0.2rem; }
+
+  .move-btn {
+    background: transparent;
+    border: 1px solid var(--bg-card);
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    line-height: 1;
+    width: 22px;
+    height: 22px;
+    cursor: pointer;
+    transition: color 0.15s ease, border-color 0.15s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .move-btn:hover:not(:disabled) { color: var(--text); border-color: var(--accent); }
+  .move-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
   .icon-badge {
     width: 32px;
@@ -422,7 +533,7 @@
   .resume-row .text-input { flex: 1; min-width: 200px; }
 
   @media (max-width: 640px) {
-    .cv-row { grid-template-columns: 32px 1fr auto auto; }
+    .cv-row { grid-template-columns: 32px 1fr auto auto auto; }
     .cv-row-type { display: none; }
   }
 </style>
