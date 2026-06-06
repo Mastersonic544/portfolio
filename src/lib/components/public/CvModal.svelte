@@ -28,6 +28,17 @@
   let resumeUrl = $state('');
   let loading   = $state(true);
 
+  // A Cloudinary upload lives on the raw delivery URL; a pasted link does not.
+  // For uploads, force a download via the fl_attachment delivery flag.
+  /** @param {string} url */
+  const isUpload = (url) => /res\.cloudinary\.com\/.+\/raw\/upload\//.test(url);
+  /** @param {string} url */
+  const downloadHref = (url) =>
+    isUpload(url) ? url.replace('/raw/upload/', '/raw/upload/fl_attachment/') : url;
+
+  let resumeIsUpload = $derived(isUpload(resumeUrl));
+  let resumeHref     = $derived(downloadHref(resumeUrl));
+
   onMount(async () => {
     try {
       const snap = await getDoc(doc(db, 'settings', 'cvs'));
@@ -74,17 +85,19 @@
           <div class="cv-grid">
             {#each cvs as cv}
               {@const Icon = ICON_MAP[cv.icon] ?? FileText}
+              {@const upload = isUpload(cv.url)}
               <a
                 class="cv-card"
-                href={cv.url}
-                target="_blank"
+                href={downloadHref(cv.url)}
+                target={upload ? undefined : '_blank'}
                 rel="noopener noreferrer"
+                download={upload ? '' : undefined}
               >
                 <div class="card-icon">
                   <Icon size={20} weight="regular" />
                 </div>
                 <span class="card-label">{cv.label}</span>
-                <span class="card-dl">Download ↓</span>
+                <span class="card-dl">{upload ? 'Download ↓' : 'Open ↗'}</span>
               </a>
             {/each}
           </div>
@@ -95,11 +108,12 @@
             {#if cvs.length > 0}<span class="resume-or">or</span>{/if}
             <a
               class="resume-btn"
-              href={resumeUrl}
-              target="_blank"
+              href={resumeHref}
+              target={resumeIsUpload ? undefined : '_blank'}
               rel="noopener noreferrer"
+              download={resumeIsUpload ? '' : undefined}
             >
-              Read Resume →
+              {resumeIsUpload ? 'Download Resume ↓' : 'Read Resume →'}
             </a>
           </div>
         {/if}
